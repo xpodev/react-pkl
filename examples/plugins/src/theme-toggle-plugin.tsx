@@ -1,4 +1,4 @@
-import { definePlugin } from 'example-sdk';
+import { definePlugin, ToolbarItem } from 'example-sdk';
 import { useAppContext } from 'example-sdk/react';
 import { useCallback } from 'react';
 
@@ -44,9 +44,11 @@ export default definePlugin({
     }
   },
 
-  components: {
-    toolbar: SettingsToolbarButton,
-  },
+  entrypoint: () => (
+    <ToolbarItem>
+      <SettingsToolbarButton />
+    </ToolbarItem>
+  ),
 });
 
 // Module-level handle for the keyboard listener (plugin is a singleton).

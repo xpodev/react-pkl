@@ -2,13 +2,8 @@ import { PluginProvider } from '@react-pkl/core/react';
 import type { ReactNode } from 'react';
 import type { AppContext } from '../app-context.js';
 import type { AppPlugin } from '../plugin.js';
-import type { PluginClient, PluginManager, PluginRegistry } from '@react-pkl/core';
+import type { PluginHost } from '@react-pkl/core';
 import { AppReactContext } from './app-context.js';
-
-type PluginSource =
-  | { registry: PluginRegistry<AppContext> }
-  | { manager: PluginManager<AppContext> }
-  | { client: PluginClient<AppContext> };
 
 export type AppPluginProviderProps = {
   /**
@@ -16,8 +11,12 @@ export type AppPluginProviderProps = {
    * and can read via `useAppContext()`.
    */
   context: AppContext;
+  /**
+   * The PluginHost instance managing plugin lifecycle and resources.
+   */
+  host: PluginHost<AppContext>;
   children: ReactNode;
-} & PluginSource;
+};
 
 /**
  * AppPluginProvider
@@ -28,22 +27,21 @@ export type AppPluginProviderProps = {
  *
  * @example
  * ```tsx
- * const manager = createAppManager();
- * manager.setContext(appContext);
+ * const host = createAppHost(appContext);
  *
- * <AppPluginProvider manager={manager} context={appContext}>
+ * <AppPluginProvider host={host} context={appContext}>
  *   <App />
  * </AppPluginProvider>
  * ```
  */
 export function AppPluginProvider({
   context,
+  host,
   children,
-  ...source
 }: AppPluginProviderProps): ReactNode {
   return (
     <AppReactContext.Provider value={context}>
-      <PluginProvider {...(source as Parameters<typeof PluginProvider<AppContext>>[0])}>
+      <PluginProvider host={host}>
         {children}
       </PluginProvider>
     </AppReactContext.Provider>

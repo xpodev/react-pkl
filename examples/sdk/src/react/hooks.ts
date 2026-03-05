@@ -3,12 +3,12 @@ import {
   usePlugin,
   usePluginMeta,
   usePlugins,
-  useSlotComponents,
+  usePluginHost,
+  useCurrentPlugin,
 } from '@react-pkl/core/react';
-import type { PluginEntry, PluginMeta } from '@react-pkl/core';
-import type { ComponentType } from 'react';
+import type { PluginEntry, PluginMeta, PluginHost } from '@react-pkl/core';
 import type { AppContext } from '../app-context.js';
-import type { AppSlot } from '../slots.js';
+import type { AppPlugin } from '../plugin.js';
 
 export { useAppContext } from './app-context.js';
 
@@ -41,10 +41,15 @@ export function useAppPluginMeta(): ReadonlyArray<PluginMeta> {
 }
 
 /**
- * Returns all enabled components for a given `AppSlot`.
+ * Returns the PluginHost instance.
  */
-export function useAppSlot(
-  slot: AppSlot
-): ReadonlyArray<ComponentType<never>> {
-  return useSlotComponents(slot) as ReadonlyArray<ComponentType<never>>;
+export function useAppPluginHost(): PluginHost<AppContext> {
+  return usePluginHost<AppContext>();
+}
+
+/**
+ * Returns the currently rendering plugin, or null if not in a plugin context.
+ */
+export function useCurrentAppPlugin(): import('../plugin.js').AppPlugin | null {
+  return useCurrentPlugin<AppContext>();
 }

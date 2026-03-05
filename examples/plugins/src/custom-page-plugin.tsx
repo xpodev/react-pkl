@@ -1,5 +1,6 @@
-import { definePlugin } from 'example-sdk';
-import { useAppContext, PluginSlot } from 'example-sdk/react';
+import { definePlugin, SettingsItem } from 'example-sdk';
+import { useAppContext } from 'example-sdk/react';
+import { useAppLayout } from 'example-sdk';
 
 /**
  * CustomPagePlugin
@@ -34,9 +35,11 @@ export default definePlugin({
   // No need for deactivate! Routes are automatically cleaned up by the plugin manager.
   // You can still add deactivate() for other cleanup if needed (e.g., event listeners, timers, etc.)
 
-  components: {
-    settings: CustomPageSettings,
-  },
+  entrypoint: () => (
+    <SettingsItem>
+      <CustomPageSettings />
+    </SettingsItem>
+  ),
 });
 
 // ---------------------------------------------------------------------------
@@ -45,6 +48,7 @@ export default definePlugin({
 
 function CustomPage() {
   const { router, notifications } = useAppContext();
+  const layout = useAppLayout();
 
   return (
     <div style={{ fontFamily: 'system-ui, sans-serif', padding: 24 }}>
@@ -61,8 +65,8 @@ function CustomPage() {
         }}
       >
         <strong style={{ marginRight: 'auto' }}>My App - Custom Page</strong>
-        {/* This slot renders components from OTHER plugins */}
-        <PluginSlot name="toolbar" />
+        {/* Render toolbar components from the layout */}
+        {layout.toolbar}
       </header>
 
       <div style={{ padding: '16px 0', marginBottom: 24, borderBottom: '2px solid #e2e8f0' }}>

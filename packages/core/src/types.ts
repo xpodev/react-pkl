@@ -1,4 +1,4 @@
-import type { ComponentType } from 'react';
+import type { ComponentType, ReactNode } from 'react';
 
 // ---------------------------------------------------------------------------
 // Plugin descriptor – static metadata about a plugin
@@ -39,11 +39,18 @@ export interface PluginModule<TContext = unknown> {
   deactivate?(): void | Promise<void>;
 
   /**
-   * Named React components contributed by the plugin.
-   * Keys are slot names that the host application supports.
+   * React entry point for the plugin.
+   * Executes in React context and can render slot items.
+   * Should return null or React elements that register with slots.
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  components?: Readonly<Record<string, ComponentType<any>>>;
+  entrypoint?(): ReactNode;
+
+  /**
+   * Layout function for theme plugins.
+   * Receives a Map where plugins can register layout slot overrides.
+   * The key is the default layout slot component, value is the replacement component.
+   */
+  layout?(slots: Map<Function, Function>): void;
 }
 
 // ---------------------------------------------------------------------------

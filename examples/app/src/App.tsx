@@ -1,10 +1,18 @@
 import { useEffect, useState, useRef } from 'react';
 import { BrowserRouter, Routes, Route, useNavigate, Link } from 'react-router-dom';
-import { createAppManager } from 'example-sdk';
-import { AppPluginProvider, PluginSlot, useAppPluginMeta } from 'example-sdk/react';
+import { 
+  createAppHost, 
+  AppLayoutProvider,
+  ToolbarSlotProvider,
+  SidebarSlotProvider,
+  DashboardSlotProvider,
+  SettingsSlotProvider,
+  useAppLayout,
+} from 'example-sdk';
+import { AppPluginProvider, useAppPluginMeta, PluginEntrypoints } from 'example-sdk/react';
 import { createMockAppContext } from './mock-context.js';
 import { LocalStoragePluginProvider } from './local-storage-adapter.js';
-import type { PluginManager } from '@react-pkl/core';
+import type { PluginHost } from '@react-pkl/core';
 import type { AppContext, PluginRoute } from 'example-sdk';
 
 // ---------------------------------------------------------------------------
@@ -31,7 +39,7 @@ function AppWithRouter() {
   const [pluginRoutes] = useState(() => new Map<string, PluginRoute>());
   const [routeVersion, setRouteVersion] = useState(0);
   
-  // Plugin manager and context - created once following proper initialization flow
+  // Plugin host and context - created once following proper initialization flow
   const [state] = useState(() => {
     // Step 1: Create the plugin provider
     const provider = new LocalStoragePluginProvider();
@@ -55,17 +63,21 @@ function AppWithRouter() {
       () => setRouteVersion((v) => v + 1)
     );
 
-    // Step 3: Create the plugin manager with context
-    const pluginManager = createAppManager(appContext);
+    // Step 3: Create the plugin host with context
+    const pluginHost = createAppHost(appContext);
     
-    return { provider, manager: pluginManager, context: appContext };
+    return { provider, host: pluginHost, context: appContext };
   });
   
-  const { provider, manager, context } = state;
+  const { provider, host, context } = state;
+  
+  // Get the plugin registry and manager from the host
+  const registry = host.getRegistry();
+  const manager = host.getManager();
   
   // Subscribe to plugin state changes and save to provider
   useEffect(() => {
-    const unsubscribe = manager.subscribe((event) => {
+    const unsubscribe = registry.subscribe((event: import('@react-pkl/core').PluginEvent) => {
       if (event.type === 'enabled' || event.type === 'disabled') {
         if (provider.savePluginState) {
           provider.savePluginState(event.pluginId, event.type === 'enabled');
@@ -73,7 +85,7 @@ function AppWithRouter() {
       }
     });
     return unsubscribe;
-  }, [manager, provider]);
+  }, [registry, provider]);
   
   // Load plugins once on mount
   const [ready, setReady] = useState(false);
@@ -99,38 +111,52 @@ function AppWithRouter() {
   if (!ready) return <p>Loading plugins…</p>;
 
   return (
-    <AppPluginProvider manager={manager} context={context}>
-      {/* Toast notifications */}
-      <div style={{ position: 'fixed', top: 16, right: 16, zIndex: 1000, display: 'flex', flexDirection: 'column', gap: 8 }}>
-        {notifications.map((notif) => (
-          <div
-            key={notif.id}
-            style={{
-              padding: '12px 16px',
-              borderRadius: 8,
-              background: notif.type === 'error' ? '#fee' : notif.type === 'success' ? '#efe' : notif.type === 'warning' ? '#ffe' : '#e0f2fe',
-              color: notif.type === 'error' ? '#c00' : notif.type === 'success' ? '#090' : notif.type === 'warning' ? '#880' : '#0369a1',
-              boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-              fontSize: 14,
-            }}
-          >
-            {notif.message}
-          </div>
-        ))}
-      </div>
+    <AppLayoutProvider initialLayout={{ toolbar: [], sidebar: [], dashboard: [], settings: [] }}>
+      <AppPluginProvider host={host} context={context}>
+        {/* Slot providers wrap the entire app */}
+        <ToolbarSlotProvider>
+          <SidebarSlotProvider>
+            <DashboardSlotProvider>
+              <SettingsSlotProvider>
+                {/* Render plugin entrypoints - they register with slot providers */}
+                <PluginEntrypoints />
+                
+                {/* Toast notifications */}
+                <div style={{ position: 'fixed', top: 16, right: 16, zIndex: 1000, display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  {notifications.map((notif) => (
+                    <div
+                      key={notif.id}
+                      style={{
+                        padding: '12px 16px',
+                        borderRadius: 8,
+                        background: notif.type === 'error' ? '#fee' : notif.type === 'success' ? '#efe' : notif.type === 'warning' ? '#ffe' : '#e0f2fe',
+                        color: notif.type === 'error' ? '#c00' : notif.type === 'success' ? '#090' : notif.type === 'warning' ? '#880' : '#0369a1',
+                        boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                        fontSize: 14,
+                      }}
+                    >
+                      {notif.message}
+                    </div>
+                  ))}
+                </div>
 
-      {/* Routes */}
-      <Routes key={routeVersion}>
-        <Route path="/" element={<Shell manager={manager} pluginRoutes={pluginRoutes} />} />
-        <Route path="/settings" element={<SettingsPage pluginRoutes={pluginRoutes} />} />
-        {/* Dynamic plugin routes */}
-        {Array.from(pluginRoutes.values()).map((route) => (
-          <Route key={route.path} path={route.path} element={<route.component />} />
-        ))}
-        {/* 404 page */}
-        <Route path="*" element={<NotFoundPage />} />
-      </Routes>
-    </AppPluginProvider>
+                {/* Routes */}
+                <Routes key={routeVersion}>
+                  <Route path="/" element={<Shell host={host} pluginRoutes={pluginRoutes} />} />
+                  <Route path="/settings" element={<SettingsPage pluginRoutes={pluginRoutes} />} />
+                  {/* Dynamic plugin routes */}
+                  {Array.from(pluginRoutes.values()).map((route) => (
+                    <Route key={route.path} path={route.path} element={<route.component />} />
+                  ))}
+                  {/* 404 page */}
+                  <Route path="*" element={<NotFoundPage />} />
+                </Routes>
+              </SettingsSlotProvider>
+            </DashboardSlotProvider>
+          </SidebarSlotProvider>
+        </ToolbarSlotProvider>
+      </AppPluginProvider>
+    </AppLayoutProvider>
   );
 }
 
@@ -165,7 +191,9 @@ function NotFoundPage() {
 // Shell – renders the application chrome with plugin slots
 // ---------------------------------------------------------------------------
 
-function Shell({ manager, pluginRoutes }: { manager: PluginManager<AppContext>; pluginRoutes: Map<string, PluginRoute> }) {
+function Shell({ host, pluginRoutes }: { host: PluginHost<AppContext>; pluginRoutes: Map<string, PluginRoute> }) {
+  const layout = useAppLayout();
+
   return (
     <div style={{ fontFamily: 'system-ui, sans-serif', padding: 24 }}>
       {/* Toolbar */}
@@ -181,8 +209,8 @@ function Shell({ manager, pluginRoutes }: { manager: PluginManager<AppContext>; 
         }}
       >
         <strong style={{ marginRight: 'auto' }}>My App</strong>
-        {/* Plugins contribute items here */}
-        <PluginSlot name="toolbar" />
+        {/* Render toolbar components from layout */}
+        {layout.toolbar}
       </header>
 
       <div style={{ display: 'flex', gap: 24 }}>
@@ -216,27 +244,25 @@ function Shell({ manager, pluginRoutes }: { manager: PluginManager<AppContext>; 
           <p style={{ margin: '0 0 8px', fontWeight: 600, fontSize: 13 }}>
             Sidebar Plugins
           </p>
-          <PluginSlot
-            name="sidebar"
-            fallback={
-              <p style={{ fontSize: 12, color: '#94a3b8' }}>No sidebar plugins.</p>
-            }
-          />
+          {layout.sidebar.length === 0 ? (
+            <p style={{ fontSize: 12, color: '#94a3b8' }}>No sidebar plugins.</p>
+          ) : (
+            layout.sidebar
+          )}
         </aside>
 
         {/* Main content */}
         <main style={{ flex: 1 }}>
           <h2 style={{ marginTop: 0 }}>Dashboard</h2>
           <div style={{ display: 'grid', gap: 16, gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))' }}>
-            <PluginSlot
-              name="dashboard"
-              fallback={
-                <p style={{ color: '#94a3b8' }}>No dashboard plugins loaded.</p>
-              }
-            />
+            {layout.dashboard.length === 0 ? (
+              <p style={{ color: '#94a3b8' }}>No dashboard plugins loaded.</p>
+            ) : (
+              layout.dashboard
+            )}
           </div>
 
-          <PluginDebugPanel manager={manager} />
+          <PluginDebugPanel host={host} />
         </main>
       </div>
     </div>
@@ -248,12 +274,13 @@ function Shell({ manager, pluginRoutes }: { manager: PluginManager<AppContext>; 
 // ---------------------------------------------------------------------------
 
 function PluginDebugPanel({
-  manager,
+  host,
 }: {
-  manager: PluginManager<AppContext>;
+  host: PluginHost<AppContext>;
 }) {
   const meta = useAppPluginMeta();
   const [, forceUpdate] = useState(0);
+  const manager = host.getManager();
 
   return (
     <section
@@ -275,7 +302,7 @@ function PluginDebugPanel({
             <button
               style={{ marginLeft: 'auto', fontSize: 12, cursor: 'pointer' }}
               onClick={async () => {
-                const entry = manager.getAll().find((e) => e.module.meta.id === m.id);
+                const entry = manager.getAll().find((e: import('@react-pkl/core').PluginEntry<AppContext>) => e.module.meta.id === m.id);
                 if (!entry) return;
                 if (entry.status === 'enabled') {
                   await manager.disable(m.id);
@@ -285,7 +312,7 @@ function PluginDebugPanel({
                 forceUpdate((v) => v + 1);
               }}
             >
-              {manager.getAll().find((e) => e.module.meta.id === m.id)?.status === 'enabled'
+              {manager.getAll().find((e: import('@react-pkl/core').PluginEntry<AppContext>) => e.module.meta.id === m.id)?.status === 'enabled'
                 ? 'Disable'
                 : 'Enable'}
             </button>
@@ -297,10 +324,13 @@ function PluginDebugPanel({
 }
 
 // ---------------------------------------------------------------------------
+// ---------------------------------------------------------------------------
 // SettingsPage – accessible via /settings route
 // ---------------------------------------------------------------------------
 
 function SettingsPage({ pluginRoutes }: { pluginRoutes: Map<string, PluginRoute> }) {
+  const layout = useAppLayout();
+
   return (
     <div style={{ fontFamily: 'system-ui, sans-serif', padding: 24 }}>
       {/* Toolbar */}
@@ -316,7 +346,8 @@ function SettingsPage({ pluginRoutes }: { pluginRoutes: Map<string, PluginRoute>
         }}
       >
         <strong style={{ marginRight: 'auto' }}>My App - Settings</strong>
-        <PluginSlot name="toolbar" />
+        {/* Render toolbar components from layout */}
+        {layout.toolbar}
       </header>
 
       <div style={{ display: 'flex', gap: 24 }}>
@@ -356,12 +387,11 @@ function SettingsPage({ pluginRoutes }: { pluginRoutes: Map<string, PluginRoute>
             </section>
 
             {/* Plugin settings sections */}
-            <PluginSlot 
-              name="settings" 
-              fallback={
-                <p style={{ color: '#94a3b8', fontSize: 14 }}>No plugin settings available.</p>
-              }
-            />
+            {layout.settings.length === 0 ? (
+              <p style={{ color: '#94a3b8', fontSize: 14 }}>No plugin settings available.</p>
+            ) : (
+              layout.settings
+            )}
           </div>
         </main>
       </div>

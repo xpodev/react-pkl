@@ -1,4 +1,4 @@
-import { definePlugin } from 'example-sdk';
+import { definePlugin, DashboardItem } from 'example-sdk';
 import { useAppContext } from 'example-sdk/react';
 
 /**
@@ -6,7 +6,7 @@ import { useAppContext } from 'example-sdk/react';
  *
  * Demonstrates:
  * - Using `useAppContext()` inside a plugin component to read the host context.
- * - Contributing a widget to the `dashboard` slot.
+ * - Contributing a widget to the `dashboard` slot using entrypoint.
  * - No activation side-effects needed (just a pure UI extension).
  */
 export default definePlugin({
@@ -17,9 +17,11 @@ export default definePlugin({
     description: 'Shows a personalised greeting on the dashboard.',
   },
 
-  components: {
-    dashboard: UserGreetingWidget,
-  },
+  entrypoint: () => (
+    <DashboardItem>
+      <UserGreetingWidget />
+    </DashboardItem>
+  ),
 });
 
 // ---------------------------------------------------------------------------

@@ -1,11 +1,11 @@
-import { definePlugin } from 'example-sdk';
+import { definePlugin, ToolbarItem } from 'example-sdk';
 
 /**
  * HelloPlugin – the simplest possible app plugin.
  *
  * Demonstrates:
  * - Using `context.logger` and `context.notifications` in `activate`.
- * - Contributing a component to the `toolbar` slot.
+ * - Contributing a component to the `toolbar` slot using entrypoint.
  */
 export default definePlugin({
   meta: {
@@ -24,9 +24,11 @@ export default definePlugin({
     // Nothing to clean up, but showing the hook exists.
   },
 
-  components: {
-    toolbar: HelloToolbarItem,
-  },
+  entrypoint: () => (
+    <ToolbarItem>
+      <HelloToolbarItem />
+    </ToolbarItem>
+  ),
 });
 
 // ---------------------------------------------------------------------------
