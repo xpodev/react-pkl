@@ -1,0 +1,22 @@
+{
+  "name": "react-pkl-monorepo",
+  "private": true,
+  "version": "0.0.0",
+  "description": "Monorepo for react-pkl plugin system",
+  "workspaces": [
+    "packages/*",
+    "examples/*"
+  ],
+  "scripts": {
+    "build": "npm run build --workspaces --if-present",
+    "dev": "npm run dev --workspaces --if-present",
+    "lint": "npm run lint --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
+    "clean": "npm run clean --workspaces --if-present"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@types/react": "^18.0.0",
+    "typescript": "^5.5.0"
+  }
+}
