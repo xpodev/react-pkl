@@ -6,6 +6,8 @@ export default defineConfig({
     'hello-plugin': 'src/hello-plugin.tsx',
     'user-greeting-plugin': 'src/user-greeting-plugin.tsx',
     'theme-toggle-plugin': 'src/theme-toggle-plugin.tsx',
+    'custom-page-plugin': 'src/custom-page-plugin.tsx',
+    'dark-theme-plugin': 'src/dark-theme-plugin.tsx',
   },
   format: ['esm', 'cjs'],
   dts: true,

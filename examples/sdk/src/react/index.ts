@@ -5,9 +5,10 @@ export {
   useAppPlugin,
   useAppPluginMeta,
   useAppPlugins,
-  useAppSlot,
   useEnabledAppPlugins,
+  useAppPluginHost,
+  useCurrentAppPlugin,
 } from './hooks.js';
 
-// Re-export generic slot component – it works with AppSlot names too.
-export { PluginSlot, type PluginSlotProps } from '@react-pkl/core/react';
+// Re-export PluginEntrypoints component for rendering plugin entrypoints
+export { PluginEntrypoints } from '@react-pkl/core/react';

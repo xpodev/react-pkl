@@ -1,13 +1,13 @@
 import {
   PluginClient,
+  PluginHost,
   PluginManager,
   type PluginClientOptions,
   type PluginLoader,
   type PluginModule,
 } from '@react-pkl/core';
-import type { ComponentType } from 'react';
 import type { AppContext } from './app-context.js';
-import type { AppSlot } from './slots.js';
+import type { AppLayout } from './slots.js';
 
 // ---------------------------------------------------------------------------
 // Typed plugin shape
@@ -15,11 +15,20 @@ import type { AppSlot } from './slots.js';
 
 /**
  * An AppPlugin narrows the generic PluginModule to the concrete AppContext
- * and restricts component keys to the known AppSlot union.
+ * and AppLayout types.
  */
 export interface AppPlugin extends PluginModule<AppContext> {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  components?: Partial<Record<AppSlot, ComponentType<any>>>;
+  /**
+   * Optional entrypoint function that returns React elements to be rendered.
+   * Used for initializing plugin UI when the plugin is enabled.
+   */
+  entrypoint?: () => React.ReactNode;
+  
+  /**
+   * Optional layout function for theme plugins.
+   * Receives a map of slot component functions and can override them.
+   */
+  layout?: (slots: Map<Function, Function>) => void;
 }
 
 export type AppPluginLoader = PluginLoader<AppContext>;
@@ -38,7 +47,7 @@ export type AppPluginLoader = PluginLoader<AppContext>;
  *   activate(context) {
  *     context.logger.log('activated');
  *   },
- *   components: { toolbar: MyToolbarButton },
+ *   entrypoint: () => <MyPluginUI />,
  * });
  * ```
  */
@@ -64,4 +73,12 @@ export function createAppClient(
   options: PluginClientOptions<AppContext>
 ): PluginClient<AppContext> {
   return new PluginClient<AppContext>(options);
+}
+
+/**
+ * Create a PluginHost pre-typed to AppContext and AppLayout.
+ * The host manages the plugin registry and theme plugins.
+ */
+export function createAppHost(context?: AppContext): PluginHost<AppContext> {
+  return new PluginHost<AppContext>(context);
 }

@@ -1,4 +1,5 @@
 import type { AppContext, PluginRoute } from 'example-sdk';
+import type { PluginHost } from '@react-pkl/core';
 
 let _notifId = 0;
 
@@ -7,12 +8,15 @@ let _notifId = 0;
  * In a real app each service would be backed by proper state management.
  */
 export function createMockAppContext(
+  pluginHost: PluginHost<AppContext>,
   onNotify?: (id: string, message: string, type: string) => void,
   onNavigate?: (path: string) => void,
   routes?: Map<string, PluginRoute>,
   onRouteChange?: () => void
 ): AppContext {
   const context: AppContext = {
+    pluginHost,
+    
     notifications: {
       show(message, type = 'info') {
         const id = `notif-${++_notifId}`;
@@ -51,6 +55,9 @@ export function createMockAppContext(
         console.info(`[router] unregistering route: ${path}`);
         routes?.delete(path);
         onRouteChange?.();
+      },
+      getRoutes() {
+        return routes || new Map();
       },
     },
 

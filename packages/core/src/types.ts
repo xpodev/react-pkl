@@ -1,4 +1,4 @@
-import type { ComponentType } from 'react';
+import type { ComponentType, ReactNode } from 'react';
 
 // ---------------------------------------------------------------------------
 // Plugin descriptor – static metadata about a plugin
@@ -39,11 +39,28 @@ export interface PluginModule<TContext = unknown> {
   deactivate?(): void | Promise<void>;
 
   /**
-   * Named React components contributed by the plugin.
-   * Keys are slot names that the host application supports.
+   * React entry point for the plugin.
+   * Executes in React context and can render slot items.
+   * Should return null or React elements that register with slots.
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  components?: Readonly<Record<string, ComponentType<any>>>;
+  entrypoint?(): ReactNode;
+
+  /**
+   * Called when this plugin is set as the active theme.
+   * Receives a Map where the plugin can register layout slot overrides.
+   * The key is the default layout slot component, value is the replacement component.
+   * 
+   * This method can also be used to apply global theme-specific CSS, inject styles, etc.
+   */
+  onThemeEnable?(slots: Map<Function, Function>): void | (() => void);
+
+  /**
+   * Called when this plugin is no longer the active theme.
+   * Use this to clean up any theme-specific CSS, remove injected styles, etc.
+   * 
+   * If onThemeEnable returned a cleanup function, it will be called automatically.
+   */
+  onThemeDisable?(): void;
 }
 
 // ---------------------------------------------------------------------------
@@ -91,3 +108,29 @@ export type PluginEvent =
   | { type: 'disabled'; pluginId: string };
 
 export type PluginEventListener = (event: PluginEvent) => void;
+
+// ---------------------------------------------------------------------------
+// Plugin utility functions
+// ---------------------------------------------------------------------------
+
+/**
+ * Check if a plugin is "static" (doesn't have lifecycle methods).
+ * Static plugins are always available and cannot be enabled/disabled.
+ * They're useful for plugins that only provide theme or UI extensions
+ * without any runtime lifecycle management.
+ */
+export function isStaticPlugin<TContext = unknown>(
+  plugin: PluginModule<TContext>
+): boolean {
+  return !plugin.activate && !plugin.deactivate;
+}
+
+/**
+ * Check if a plugin is a theme plugin (has theme lifecycle methods).
+ * Theme plugins can be set as the active theme using PluginHost.setThemePlugin().
+ */
+export function isThemePlugin<TContext = unknown>(
+  plugin: PluginModule<TContext>
+): boolean {
+  return typeof plugin.onThemeEnable === 'function';
+}

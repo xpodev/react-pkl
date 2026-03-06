@@ -1,5 +1,6 @@
 import { useContext, useMemo, type ComponentType } from 'react';
-import type { PluginEntry, PluginMeta } from '../types.js';
+import type { PluginEntry, PluginMeta, PluginModule } from '../types.js';
+import type { PluginHost } from '../plugin-host.js';
 import { PluginContext } from './context.js';
 
 function usePluginContext() {
@@ -10,6 +11,24 @@ function usePluginContext() {
     );
   }
   return ctx;
+}
+
+// ---------------------------------------------------------------------------
+// usePluginHost – returns the PluginHost instance
+// ---------------------------------------------------------------------------
+
+export function usePluginHost<TContext = unknown>(): PluginHost<TContext> {
+  const { host } = usePluginContext();
+  return host as PluginHost<TContext>;
+}
+
+// ---------------------------------------------------------------------------
+// useCurrentPlugin – returns the currently executing plugin
+// ---------------------------------------------------------------------------
+
+export function useCurrentPlugin<TContext = unknown>(): PluginModule<TContext> | null {
+  const { currentPlugin } = usePluginContext();
+  return currentPlugin as PluginModule<TContext> | null;
 }
 
 // ---------------------------------------------------------------------------
@@ -60,22 +79,19 @@ export function usePluginMeta(): ReadonlyArray<PluginMeta> {
 }
 
 // ---------------------------------------------------------------------------
-// useSlotComponents – returns all components for a given slot name
+// useSlotComponents – DEPRECATED in v0.2.0
+// Use layout context and slot providers instead
 // ---------------------------------------------------------------------------
 
+/**
+ * @deprecated Use layout context and slot providers instead
+ */
 export function useSlotComponents(
   slot: string
 ): ReadonlyArray<ComponentType<unknown>> {
-  const { registry, version: _version } = usePluginContext();
-  return useMemo(
-    () =>
-      registry
-        .getEnabled()
-        .flatMap((e) => {
-          const comp = e.module.components?.[slot];
-          return comp ? [comp] : [];
-        }),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [registry, _version, slot]
-  );
+  // This hook is deprecated in v0.2.0
+  // Components are now registered through slot Item components
+  // and accessed via the layout context
+  console.warn('useSlotComponents is deprecated. Use layout context and slot providers instead.');
+  return [];
 }

@@ -1,4 +1,4 @@
-import { definePlugin } from 'example-sdk';
+import { definePlugin, DashboardItem } from 'example-sdk';
 import { useAppContext } from 'example-sdk/react';
 
 /**
@@ -6,7 +6,7 @@ import { useAppContext } from 'example-sdk/react';
  *
  * Demonstrates:
  * - Using `useAppContext()` inside a plugin component to read the host context.
- * - Contributing a widget to the `dashboard` slot.
+ * - Contributing a widget to the `dashboard` slot using entrypoint.
  * - No activation side-effects needed (just a pure UI extension).
  */
 export default definePlugin({
@@ -17,9 +17,11 @@ export default definePlugin({
     description: 'Shows a personalised greeting on the dashboard.',
   },
 
-  components: {
-    dashboard: UserGreetingWidget,
-  },
+  entrypoint: () => (
+    <DashboardItem>
+      <UserGreetingWidget />
+    </DashboardItem>
+  ),
 });
 
 // ---------------------------------------------------------------------------
@@ -32,7 +34,7 @@ function UserGreetingWidget() {
   if (!user) {
     return (
       <div style={cardStyle}>
-        <p style={{ margin: 0, color: '#64748b' }}>
+        <p style={{ margin: 0, color: 'var(--text-secondary, #64748b)' }}>
           Sign in to see your personalised greeting.
         </p>
       </div>
@@ -41,10 +43,10 @@ function UserGreetingWidget() {
 
   return (
     <div style={cardStyle}>
-      <h3 style={{ margin: '0 0 4px', fontSize: 16 }}>
+      <h3 style={{ margin: '0 0 4px', fontSize: 16, color: 'var(--text-primary, inherit)' }}>
         Welcome back, {user.name}!
       </h3>
-      <p style={{ margin: 0, fontSize: 13, color: '#64748b' }}>
+      <p style={{ margin: 0, fontSize: 13, color: 'var(--text-secondary, #64748b)' }}>
         {user.email} · {user.role}
       </p>
     </div>
@@ -54,6 +56,6 @@ function UserGreetingWidget() {
 const cardStyle: React.CSSProperties = {
   padding: '16px',
   borderRadius: 8,
-  border: '1px solid #e2e8f0',
-  background: '#fff',
+  border: '1px solid var(--border-color, #e2e8f0)',
+  background: 'var(--bg-primary, #fff)',
 };

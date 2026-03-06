@@ -38,6 +38,10 @@ export interface RouterService {
    * Unregister a route by path (rarely needed - auto-cleanup handles this).
    */
   unregisterRoute(path: string): void;
+  /**
+   * Get all registered plugin routes.
+   */
+  getRoutes(): Map<string, PluginRoute>;
 }
 
 export interface UserInfo {
@@ -66,6 +70,16 @@ export interface AppContext {
   user: UserInfo | null;
   /** Namespaced logger. */
   logger: LoggerService;
+  /**
+   * Plugin host for theme management and layout control.
+   * Theme plugins can use this to register themselves:
+   * ```ts
+   * activate(context) {
+   *   context.pluginHost.setThemePlugin(this);
+   * }
+   * ```
+   */
+  pluginHost: import('@react-pkl/core').PluginHost<AppContext>;
   /**
    * Resource tracker for automatic cleanup.
    * Plugins can register cleanup functions that run when they're disabled.

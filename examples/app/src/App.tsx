@@ -1,10 +1,19 @@
 import { useEffect, useState, useRef } from 'react';
 import { BrowserRouter, Routes, Route, useNavigate, Link } from 'react-router-dom';
-import { createAppManager } from 'example-sdk';
-import { AppPluginProvider, PluginSlot, useAppPluginMeta } from 'example-sdk/react';
+import { 
+  createAppHost, 
+  AppLayoutProvider,
+  ToolbarSlotProvider,
+  SidebarSlotProvider,
+  DashboardSlotProvider,
+  SettingsSlotProvider,
+} from 'example-sdk';
+import { AppPluginProvider, PluginEntrypoints } from 'example-sdk/react';
 import { createMockAppContext } from './mock-context.js';
 import { LocalStoragePluginProvider } from './local-storage-adapter.js';
-import type { PluginManager } from '@react-pkl/core';
+import { Shell } from './pages/Shell.js';
+import { SettingsPage } from './pages/SettingsPage.js';
+import type { PluginHost } from '@react-pkl/core';
 import type { AppContext, PluginRoute } from 'example-sdk';
 
 // ---------------------------------------------------------------------------
@@ -31,13 +40,14 @@ function AppWithRouter() {
   const [pluginRoutes] = useState(() => new Map<string, PluginRoute>());
   const [routeVersion, setRouteVersion] = useState(0);
   
-  // Plugin manager and context - created once following proper initialization flow
+  // Plugin host and context - created once following proper initialization flow
   const [state] = useState(() => {
     // Step 1: Create the plugin provider
     const provider = new LocalStoragePluginProvider();
     
-    // Step 2: Create the context (without plugins)
+    // Step 2: Create a placeholder context (will add pluginHost after)
     const appContext = createMockAppContext(
+      null as any, // Placeholder for pluginHost
       // onNotify
       (id, message, type) => {
         setNotifications((prev) => [...prev, { id, message, type }]);
@@ -55,17 +65,24 @@ function AppWithRouter() {
       () => setRouteVersion((v) => v + 1)
     );
 
-    // Step 3: Create the plugin manager with context
-    const pluginManager = createAppManager(appContext);
+    // Step 3: Create the plugin host with context
+    const pluginHost = createAppHost(appContext);
     
-    return { provider, manager: pluginManager, context: appContext };
+    // Step 4: Now set the pluginHost reference in the context
+    appContext.pluginHost = pluginHost;
+    
+    return { provider, host: pluginHost, context: appContext };
   });
   
-  const { provider, manager, context } = state;
+  const { provider, host, context } = state;
+  
+  // Get the plugin registry and manager from the host
+  const registry = host.getRegistry();
+  const manager = host.getManager();
   
   // Subscribe to plugin state changes and save to provider
   useEffect(() => {
-    const unsubscribe = manager.subscribe((event) => {
+    const unsubscribe = registry.subscribe((event: import('@react-pkl/core').PluginEvent) => {
       if (event.type === 'enabled' || event.type === 'disabled') {
         if (provider.savePluginState) {
           provider.savePluginState(event.pluginId, event.type === 'enabled');
@@ -73,7 +90,7 @@ function AppWithRouter() {
       }
     });
     return unsubscribe;
-  }, [manager, provider]);
+  }, [registry, provider]);
   
   // Load plugins once on mount
   const [ready, setReady] = useState(false);
@@ -91,46 +108,74 @@ function AppWithRouter() {
       for (const plugin of plugins) {
         await manager.add(plugin.loader, { enabled: plugin.enabled });
       }
+      
+      // Step 5: Restore saved theme from localStorage
+      const savedThemeId = localStorage.getItem('react-pkl:active-theme');
+      if (savedThemeId && savedThemeId !== 'default') {
+        // Find the theme plugin
+        const allPlugins = registry.getAll().map(e => e.module);
+        const themePlugin = allPlugins.find(
+          p => p.meta.id === savedThemeId && typeof p.onThemeEnable === 'function'
+        );
+        if (themePlugin) {
+          host.setThemePlugin(themePlugin);
+        }
+      }
+      
       setReady(true);
     }
     void loadPlugins();
-  }, [manager, provider]);
+  }, [manager, provider, registry, host]);
 
   if (!ready) return <p>Loading plugins…</p>;
 
   return (
-    <AppPluginProvider manager={manager} context={context}>
-      {/* Toast notifications */}
-      <div style={{ position: 'fixed', top: 16, right: 16, zIndex: 1000, display: 'flex', flexDirection: 'column', gap: 8 }}>
-        {notifications.map((notif) => (
-          <div
-            key={notif.id}
-            style={{
-              padding: '12px 16px',
-              borderRadius: 8,
-              background: notif.type === 'error' ? '#fee' : notif.type === 'success' ? '#efe' : notif.type === 'warning' ? '#ffe' : '#e0f2fe',
-              color: notif.type === 'error' ? '#c00' : notif.type === 'success' ? '#090' : notif.type === 'warning' ? '#880' : '#0369a1',
-              boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-              fontSize: 14,
-            }}
-          >
-            {notif.message}
-          </div>
-        ))}
-      </div>
+    <AppLayoutProvider initialLayout={{ toolbar: [], sidebar: [], dashboard: [], settings: [] }}>
+      <AppPluginProvider host={host} context={context}>
+        {/* Slot providers wrap the entire app */}
+        <ToolbarSlotProvider>
+          <SidebarSlotProvider>
+            <DashboardSlotProvider>
+              <SettingsSlotProvider>
+                {/* Render plugin entrypoints - they register with slot providers */}
+                <PluginEntrypoints />
+                
+                {/* Toast notifications */}
+                <div style={{ position: 'fixed', top: 16, right: 16, zIndex: 1000, display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  {notifications.map((notif) => (
+                    <div
+                      key={notif.id}
+                      style={{
+                        padding: '12px 16px',
+                        borderRadius: 8,
+                        background: notif.type === 'error' ? '#fee' : notif.type === 'success' ? '#efe' : notif.type === 'warning' ? '#ffe' : '#e0f2fe',
+                        color: notif.type === 'error' ? '#c00' : notif.type === 'success' ? '#090' : notif.type === 'warning' ? '#880' : '#0369a1',
+                        boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                        fontSize: 14,
+                      }}
+                    >
+                      {notif.message}
+                    </div>
+                  ))}
+                </div>
 
-      {/* Routes */}
-      <Routes key={routeVersion}>
-        <Route path="/" element={<Shell manager={manager} pluginRoutes={pluginRoutes} />} />
-        <Route path="/settings" element={<SettingsPage pluginRoutes={pluginRoutes} />} />
-        {/* Dynamic plugin routes */}
-        {Array.from(pluginRoutes.values()).map((route) => (
-          <Route key={route.path} path={route.path} element={<route.component />} />
-        ))}
-        {/* 404 page */}
-        <Route path="*" element={<NotFoundPage />} />
-      </Routes>
-    </AppPluginProvider>
+                {/* Routes */}
+                <Routes key={routeVersion}>
+                  <Route path="/" element={<Shell host={host} />} />
+                  <Route path="/settings" element={<SettingsPage host={host} />} />
+                  {/* Dynamic plugin routes */}
+                  {Array.from(pluginRoutes.values()).map((route) => (
+                    <Route key={route.path} path={route.path} element={<route.component />} />
+                  ))}
+                  {/* 404 page */}
+                  <Route path="*" element={<NotFoundPage />} />
+                </Routes>
+              </SettingsSlotProvider>
+            </DashboardSlotProvider>
+          </SidebarSlotProvider>
+        </ToolbarSlotProvider>
+      </AppPluginProvider>
+    </AppLayoutProvider>
   );
 }
 
@@ -157,214 +202,6 @@ function NotFoundPage() {
       >
         Go Home
       </Link>
-    </div>
-  );
-}
-
-// ---------------------------------------------------------------------------
-// Shell – renders the application chrome with plugin slots
-// ---------------------------------------------------------------------------
-
-function Shell({ manager, pluginRoutes }: { manager: PluginManager<AppContext>; pluginRoutes: Map<string, PluginRoute> }) {
-  return (
-    <div style={{ fontFamily: 'system-ui, sans-serif', padding: 24 }}>
-      {/* Toolbar */}
-      <header
-        style={{
-          display: 'flex',
-          gap: 8,
-          alignItems: 'center',
-          padding: '8px 16px',
-          background: '#f1f5f9',
-          borderRadius: 8,
-          marginBottom: 24,
-        }}
-      >
-        <strong style={{ marginRight: 'auto' }}>My App</strong>
-        {/* Plugins contribute items here */}
-        <PluginSlot name="toolbar" />
-      </header>
-
-      <div style={{ display: 'flex', gap: 24 }}>
-        {/* Sidebar */}
-        <aside
-          style={{
-            width: 200,
-            background: '#f8fafc',
-            borderRadius: 8,
-            padding: 16,
-          }}
-        >
-          <p style={{ margin: '0 0 8px', fontWeight: 600, fontSize: 13 }}>
-            Navigation
-          </p>
-          <nav style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-            <Link to="/" style={{ fontSize: 13, color: '#0369a1', textDecoration: 'none', padding: '4px 8px' }}>
-              🏠 Home
-            </Link>
-            <Link to="/settings" style={{ fontSize: 13, color: '#0369a1', textDecoration: 'none', padding: '4px 8px' }}>
-              ⚙ Settings
-            </Link>
-            {/* Plugin routes */}
-            {Array.from(pluginRoutes.values()).filter(r => r.label).map((route) => (
-              <Link key={route.path} to={route.path} style={{ fontSize: 13, color: '#0369a1', textDecoration: 'none', padding: '4px 8px' }}>
-                {route.label}
-              </Link>
-            ))}
-          </nav>
-          <hr style={{ margin: '12px 0', border: 'none', borderTop: '1px solid #e2e8f0' }} />
-          <p style={{ margin: '0 0 8px', fontWeight: 600, fontSize: 13 }}>
-            Sidebar Plugins
-          </p>
-          <PluginSlot
-            name="sidebar"
-            fallback={
-              <p style={{ fontSize: 12, color: '#94a3b8' }}>No sidebar plugins.</p>
-            }
-          />
-        </aside>
-
-        {/* Main content */}
-        <main style={{ flex: 1 }}>
-          <h2 style={{ marginTop: 0 }}>Dashboard</h2>
-          <div style={{ display: 'grid', gap: 16, gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))' }}>
-            <PluginSlot
-              name="dashboard"
-              fallback={
-                <p style={{ color: '#94a3b8' }}>No dashboard plugins loaded.</p>
-              }
-            />
-          </div>
-
-          <PluginDebugPanel manager={manager} />
-        </main>
-      </div>
-    </div>
-  );
-}
-
-// ---------------------------------------------------------------------------
-// Debug panel – shows registered plugins and lets you toggle them
-// ---------------------------------------------------------------------------
-
-function PluginDebugPanel({
-  manager,
-}: {
-  manager: PluginManager<AppContext>;
-}) {
-  const meta = useAppPluginMeta();
-  const [, forceUpdate] = useState(0);
-
-  return (
-    <section
-      style={{
-        marginTop: 32,
-        padding: 16,
-        border: '1px dashed #cbd5e1',
-        borderRadius: 8,
-      }}
-    >
-      <h3 style={{ marginTop: 0, fontSize: 14, color: '#475569' }}>
-        Registered plugins ({meta.length})
-      </h3>
-      <ul style={{ margin: 0, padding: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 8 }}>
-        {meta.map((m) => (
-          <li key={m.id} style={{ display: 'flex', gap: 12, alignItems: 'center', fontSize: 13 }}>
-            <span style={{ fontWeight: 500 }}>{m.name}</span>
-            <span style={{ color: '#94a3b8' }}>v{m.version}</span>
-            <button
-              style={{ marginLeft: 'auto', fontSize: 12, cursor: 'pointer' }}
-              onClick={async () => {
-                const entry = manager.getAll().find((e) => e.module.meta.id === m.id);
-                if (!entry) return;
-                if (entry.status === 'enabled') {
-                  await manager.disable(m.id);
-                } else {
-                  await manager.enable(m.id);
-                }
-                forceUpdate((v) => v + 1);
-              }}
-            >
-              {manager.getAll().find((e) => e.module.meta.id === m.id)?.status === 'enabled'
-                ? 'Disable'
-                : 'Enable'}
-            </button>
-          </li>
-        ))}
-      </ul>
-    </section>
-  );
-}
-
-// ---------------------------------------------------------------------------
-// SettingsPage – accessible via /settings route
-// ---------------------------------------------------------------------------
-
-function SettingsPage({ pluginRoutes }: { pluginRoutes: Map<string, PluginRoute> }) {
-  return (
-    <div style={{ fontFamily: 'system-ui, sans-serif', padding: 24 }}>
-      {/* Toolbar */}
-      <header
-        style={{
-          display: 'flex',
-          gap: 8,
-          alignItems: 'center',
-          padding: '8px 16px',
-          background: '#f1f5f9',
-          borderRadius: 8,
-          marginBottom: 24,
-        }}
-      >
-        <strong style={{ marginRight: 'auto' }}>My App - Settings</strong>
-        <PluginSlot name="toolbar" />
-      </header>
-
-      <div style={{ display: 'flex', gap: 24 }}>
-        <aside
-          style={{
-            width: 200,
-            background: '#f8fafc',
-            borderRadius: 8,
-            padding: 16,
-          }}
-        >
-          <p style={{ margin: '0 0 8px', fontWeight: 600, fontSize: 13 }}>
-            Navigation
-          </p>
-          <nav style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-            <Link to="/" style={{ fontSize: 13, color: '#0369a1', textDecoration: 'none', padding: '4px 8px' }}>
-              🏠 Home
-            </Link>
-            <Link to="/settings" style={{ fontSize: 13, color: '#0369a1', textDecoration: 'none', padding: '4px 8px', fontWeight: 600 }}>
-              ⚙ Settings
-            </Link>
-            {/* Plugin routes */}
-            {Array.from(pluginRoutes.values()).filter(r => r.label).map((route) => (
-              <Link key={route.path} to={route.path} style={{ fontSize: 13, color: '#0369a1', textDecoration: 'none', padding: '4px 8px' }}>
-                {route.label}
-              </Link>
-            ))}
-          </nav>
-        </aside>
-
-        <main style={{ flex: 1 }}>
-          <h2 style={{ marginTop: 0 }}>Application Settings</h2>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-            <section style={{ padding: 16, background: '#f8fafc', borderRadius: 8 }}>
-              <h3 style={{ marginTop: 0, fontSize: 16 }}>General</h3>
-              <p style={{ color: '#64748b', fontSize: 14 }}>Basic application settings</p>
-            </section>
-
-            {/* Plugin settings sections */}
-            <PluginSlot 
-              name="settings" 
-              fallback={
-                <p style={{ color: '#94a3b8', fontSize: 14 }}>No plugin settings available.</p>
-              }
-            />
-          </div>
-        </main>
-      </div>
     </div>
   );
 }
