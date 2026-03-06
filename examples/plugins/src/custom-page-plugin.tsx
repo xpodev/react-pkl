@@ -1,6 +1,6 @@
 import { definePlugin, SettingsItem } from 'example-sdk';
 import { useAppContext } from 'example-sdk/react';
-import { useAppLayout } from 'example-sdk';
+import { useAppLayout, AppHeader } from 'example-sdk';
 
 /**
  * CustomPagePlugin
@@ -53,21 +53,7 @@ function CustomPage() {
   return (
     <div style={{ fontFamily: 'system-ui, sans-serif', padding: 24 }}>
       {/* Toolbar - includes plugin components from other plugins! */}
-      <header
-        style={{
-          display: 'flex',
-          gap: 8,
-          alignItems: 'center',
-          padding: '8px 16px',
-          background: '#f1f5f9',
-          borderRadius: 8,
-          marginBottom: 24,
-        }}
-      >
-        <strong style={{ marginRight: 'auto' }}>My App - Custom Page</strong>
-        {/* Render toolbar components from the layout */}
-        {layout.toolbar}
-      </header>
+      <AppHeader toolbar={layout.toolbar}/>
 
       <div style={{ padding: '16px 0', marginBottom: 24, borderBottom: '2px solid #e2e8f0' }}>
         <h1 style={{ margin: 0, fontSize: 28, color: '#1e293b' }}>

@@ -1,6 +1,6 @@
 # React PKL
 
-A **typesafe plugin system for React applications** written in TypeScript. React PKL allows you to extend React applications from external sources through a robust, type-safe plugin architecture.
+A **typesafe plugin system for React applications** written in TypeScript. React PKL allows you to extend React applications from external sources through a robust, type-safe plugin architecture with advanced theming support.
 
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.5-blue.svg)](https://www.typescriptlang.org/)
 [![React](https://img.shields.io/badge/React-18.0+-61dafb.svg)](https://reactjs.org/)
@@ -9,10 +9,13 @@ A **typesafe plugin system for React applications** written in TypeScript. React
 
 React PKL is designed for **SDK developers** who want to create extensible React applications. It provides the foundation for building plugin systems where:
 
-- Plugins can extend the UI through defined **slots**
+- Plugins can extend the UI through defined **slots** and **layout overrides**
 - Plugins receive a **typesafe context** from the host application
+- **Theme plugins** can override entire layout components with custom styling
+- **Static plugins** work without lifecycle management (perfect for themes)
 - Resources are **automatically cleaned up** when plugins are disabled
 - Plugins can be managed **locally** or fetched from a **remote source**
+- **Style context** provides type-safe access to theme variables
 
 ## 📦 Packages
 
@@ -292,6 +295,131 @@ Get all components registered for a slot:
 const toolbarComponents = useSlotComponents('toolbar');
 ```
 
+## 🎨 Theme System
+
+### Creating Theme Plugins
+
+Theme plugins use `onThemeEnable()` and `onThemeDisable()` to manage theme lifecycle:
+
+```typescript
+import { definePlugin, AppHeader, AppSidebar, StyleProvider } from 'my-sdk';
+
+const darkThemePlugin = definePlugin({
+  meta: {
+    id: 'com.example.dark-theme',
+    name: 'Dark Theme',
+    version: '1.0.0',
+  },
+  
+  // Theme plugins don't need activate/deactivate (static plugins)
+  // They only activate when set as the active theme
+  
+  onThemeEnable(slots) {
+    // Apply CSS variables
+    document.documentElement.style.setProperty('--bg-primary', '#1a1a1a');
+    document.documentElement.style.setProperty('--text-primary', '#e4e4e7');
+    
+    // Override layout slots with themed components
+    slots.set(AppHeader, DarkHeader);
+    slots.set(AppSidebar, DarkSidebar);
+    
+    // Return cleanup function
+    return () => {
+      document.documentElement.style.removeProperty('--bg-primary');
+      document.documentElement.style.removeProperty('--text-primary');
+    };
+  },
+  
+  onThemeDisable() {
+    console.log('Theme disabled - additional cleanup');
+  },
+});
+
+function DarkHeader({ toolbar }) {
+  return (
+    <StyleProvider variables={{
+      bgPrimary: '#1a1a1a',
+      textPrimary: '#e4e4e7',
+      accentColor: '#60a5fa',
+    }}>
+      <header style={{ background: 'linear-gradient(135deg, #18181b 0%, #27272a 100%)' }}>
+        {toolbar}
+      </header>
+    </StyleProvider>
+  );
+}
+```
+
+### Using StyleProvider
+
+Provide type-safe style variables to components:
+
+```tsx
+import { StyleProvider, useStyles } from 'my-sdk';
+
+function MyComponent() {
+  const styles = useStyles();
+  
+  return (
+    <div style={{
+      background: styles.bgPrimary,
+      color: styles.textPrimary,
+      borderColor: styles.borderColor,
+    }}>
+      Themed content
+    </div>
+  );
+}
+```
+
+### Setting Active Theme
+
+```typescript
+import { isThemePlugin } from '@react-pkl/core';
+
+// Check if a plugin is a theme plugin
+if (isThemePlugin(plugin)) {
+  pluginHost.setThemePlugin(plugin);
+}
+
+// Get current theme
+const currentTheme = pluginHost.getThemePlugin();
+
+// Remove theme (back to default)
+pluginHost.setThemePlugin(null);
+
+// Persist theme in localStorage
+localStorage.setItem('active-theme', plugin.meta.id);
+```
+
+### Static vs Dynamic Plugins
+
+React PKL supports two plugin types:
+
+```typescript
+import { isStaticPlugin, isThemePlugin } from '@react-pkl/core';
+
+// Static plugins - no activate/deactivate lifecycle
+// Perfect for theme plugins that only need theme lifecycle
+const themePlugin = {
+  meta: { id: 'theme', name: 'Theme', version: '1.0.0' },
+  onThemeEnable(slots) { /* ... */ },
+  onThemeDisable() { /* ... */ },
+};
+
+isStaticPlugin(themePlugin); // true
+isThemePlugin(themePlugin);  // true
+
+// Dynamic plugins - full lifecycle management
+const dataPlugin = {
+  meta: { id: 'data', name: 'Data', version: '1.0.0' },
+  async activate(context) { /* ... */ },
+  async deactivate() { /* ... */ },
+};
+
+isStaticPlugin(dataPlugin); // false
+```
+
 ## 🧩 Components
 
 ### `<PluginProvider>`
@@ -383,10 +511,20 @@ interface PluginModule<TContext> {
   // Optional lifecycle hooks
   activate?(context: TContext): void | Promise<void>;
   deactivate?(): void | Promise<void>;
+  
+  // Optional React entrypoint
+  entrypoint?(): ReactNode;
 
-  // Optional React components by slot name
-  components?: Record<string, ComponentType<any>>;
+  // Optional theme lifecycle hooks
+  onThemeEnable?(slots: Map<Function, Function>): void | (() => void);
+  onThemeDisable?(): void;
 }
+```
+
+**Plugin Types:**
+- **Dynamic Plugins**: Have `activate`/`deactivate` - Full lifecycle management
+- **Static Plugins**: No `activate`/`deactivate` - Always available, perfect for themes
+- **Theme Plugins**: Have `onThemeEnable`/`onThemeDisable` - Can be set as active theme
 ```
 
 ### TypeScript Plugin Helper
@@ -469,8 +607,9 @@ The repository includes complete examples:
 - **`examples/plugins`** - Sample plugins demonstrating various features:
   - `hello-plugin` - Basic plugin with notification
   - `user-greeting-plugin` - Accesses app context
-  - `theme-toggle-plugin` - State management
+  - `theme-toggle-plugin` - State management with toolbar button
   - `custom-page-plugin` - Route registration with cleanup
+  - `dark-theme-plugin` - Complete theme with layout overrides and style context
 
 ## 🏛️ Design Philosophy
 
