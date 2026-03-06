@@ -1,3 +1,8 @@
+---
+sidebar_position: 5
+title: Quick Reference
+---
+
 # Quick Reference
 
 Fast lookup for common tasks and patterns in React PKL.

@@ -1,3 +1,8 @@
+---
+sidebar_position: 4
+title: API Reference
+---
+
 # API Reference
 
 Complete API documentation for React PKL v0.2.0.
@@ -678,21 +683,46 @@ const cssVars = readStyleVariablesFromCSS();
 
 These utilities help create custom slot components (usually defined in your SDK).
 
-### `createSlot<TProps>(name: string): ComponentType<TProps>`
+### `createSlot<TProps = { children: ReactNode }>(name: string): ComponentType<TProps>`
 
 Create a slot component that plugins can register items to.
+
+**Type Parameter:**
+- `TProps` - Props that the slot component accepts (defaults to `{ children: ReactNode }`)
+
+**Parameters:**
+- `name: string` - Unique identifier for the slot
+
+**Returns:** React component type
+
+**Examples:**
 
 ```typescript
 import { createSlot } from '@react-pkl/core/react';
 
-export const ToolbarItem = createSlot<{ children: ReactNode }>('toolbar');
-export const SidebarItem = createSlot<{ children: ReactNode }>('sidebar');
+// Simple slots (use default children prop)
+export const ToolbarItem = createSlot('toolbar');
+export const SidebarItem = createSlot('sidebar');
+
+// Slot with custom props
+export const SettingsSection = createSlot<{
+  title: string;
+  icon?: string;
+  children: ReactNode;
+}>('settings');
 ```
 
 Plugin usage:
 ```tsx
 entrypoint() {
-  return <ToolbarItem>My Button</ToolbarItem>;
+  return (
+    <>
+      <ToolbarItem>My Button</ToolbarItem>
+      <SettingsSection title="Advanced" icon="gear">
+        <MySettings />
+      </SettingsSection>
+    </>
+  );
 }
 ```
 

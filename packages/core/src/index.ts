@@ -7,6 +7,7 @@ export type {
   PluginModule,
   PluginStatus,
   RemotePluginDescriptor,
+  PluginInfrastructure,
 } from './types.js';
 
 export { isStaticPlugin, isThemePlugin } from './types.js';

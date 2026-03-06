@@ -1,3 +1,8 @@
+---
+sidebar_position: 8
+title: Architecture
+---
+
 # Architecture Overview
 
 This document provides a high-level overview of the React PKL v0.2.0 architecture.

@@ -95,3 +95,47 @@ export function useSlotComponents(
   console.warn('useSlotComponents is deprecated. Use layout context and slot providers instead.');
   return [];
 }
+
+// ---------------------------------------------------------------------------
+// createTypedHooks – factory for creating typed hook wrappers
+// ---------------------------------------------------------------------------
+
+/**
+ * Creates a set of typed hooks for a specific context type.
+ * This eliminates the need to manually wrap each hook with type parameters.
+ * 
+ * @example
+ * ```typescript
+ * import { createTypedHooks } from '@react-pkl/core/react';
+ * import type { MyAppContext } from './types';
+ * 
+ * export const {
+ *   usePlugins: useAppPlugins,
+ *   useEnabledPlugins: useEnabledAppPlugins,
+ *   usePlugin: useAppPlugin,
+ *   usePluginHost: useAppPluginHost,
+ *   useCurrentPlugin: useCurrentAppPlugin,
+ * } = createTypedHooks<MyAppContext>();
+ * ```
+ */
+export function createTypedHooks<TContext>() {
+  return {
+    usePlugins: (): ReadonlyArray<PluginEntry<TContext>> => 
+      usePlugins<TContext>(),
+    
+    useEnabledPlugins: (): ReadonlyArray<PluginEntry<TContext>> => 
+      useEnabledPlugins<TContext>(),
+    
+    usePlugin: (id: string): PluginEntry<TContext> | undefined => 
+      usePlugin<TContext>(id),
+    
+    usePluginMeta: (): ReadonlyArray<PluginMeta> => 
+      usePluginMeta(),
+    
+    usePluginHost: (): PluginHost<TContext> => 
+      usePluginHost<TContext>(),
+    
+    useCurrentPlugin: (): PluginModule<TContext> | null => 
+      useCurrentPlugin<TContext>(),
+  };
+}

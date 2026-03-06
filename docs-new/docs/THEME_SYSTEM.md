@@ -1,3 +1,8 @@
+---
+sidebar_position: 7
+title: Theme System
+---
+
 # React PKL v0.2.0 - Theme System Documentation
 
 This guide covers the v0.2.0 theme system features and how to create theme plugins.

@@ -1,3 +1,8 @@
+---
+sidebar_position: 9
+title: Contributing
+---
+
 # Contributing to React PKL
 
 Thank you for your interest in contributing to React PKL! This guide will help you get started.

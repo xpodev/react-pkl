@@ -1,3 +1,8 @@
+---
+sidebar_position: 2
+title: Getting Started
+---
+
 # Getting Started with React PKL
 
 This guide will walk you through creating your first plugin system with React PKL.

@@ -1,7 +1,6 @@
 export { AppPluginProvider, type AppPluginProviderProps } from './provider.js';
 
 export {
-  useAppContext,
   useAppPlugin,
   useAppPluginMeta,
   useAppPlugins,
@@ -9,6 +8,18 @@ export {
   useAppPluginHost,
   useCurrentAppPlugin,
 } from './hooks.js';
+
+// Export service contexts and hooks
+export {
+  NotificationsProvider,
+  useNotifications,
+  RouterProvider,
+  useRouter,
+  UserProvider,
+  useUser,
+  LoggerProvider,
+  useLogger,
+} from './services.js';
 
 // Re-export PluginEntrypoints component for rendering plugin entrypoints
 export { PluginEntrypoints } from '@react-pkl/core/react';

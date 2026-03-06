@@ -3,24 +3,25 @@ import {
   PluginHost,
   PluginManager,
   type PluginClientOptions,
+  type PluginInfrastructure,
   type PluginLoader,
   type PluginModule,
 } from '@react-pkl/core';
-import type { AppContext } from './app-context.js';
-import type { AppLayout } from './slots.js';
 
 // ---------------------------------------------------------------------------
 // Typed plugin shape
 // ---------------------------------------------------------------------------
 
 /**
- * An AppPlugin narrows the generic PluginModule to the concrete AppContext
- * and AppLayout types.
+ * An AppPlugin uses PluginInfrastructure for lifecycle methods.
+ * App services are accessed via hooks in the entrypoint, not via context.
  */
-export interface AppPlugin extends PluginModule<AppContext> {
+export interface AppPlugin extends PluginModule<PluginInfrastructure> {
   /**
    * Optional entrypoint function that returns React elements to be rendered.
    * Used for initializing plugin UI when the plugin is enabled.
+   * 
+   * Use hooks like useNotifications(), useRouter(), useUser() to access app services.
    */
   entrypoint?: () => React.ReactNode;
   
@@ -31,7 +32,7 @@ export interface AppPlugin extends PluginModule<AppContext> {
   layout?: (slots: Map<Function, Function>) => void;
 }
 
-export type AppPluginLoader = PluginLoader<AppContext>;
+export type AppPluginLoader = PluginLoader<PluginInfrastructure>;
 
 // ---------------------------------------------------------------------------
 // definePlugin – identity helper that infers the generic correctly
@@ -44,10 +45,16 @@ export type AppPluginLoader = PluginLoader<AppContext>;
  * ```ts
  * export default definePlugin({
  *   meta: { id: 'my-plugin', name: 'My Plugin', version: '1.0.0' },
- *   activate(context) {
- *     context.logger.log('activated');
+ *   activate(infra) {
+ *     // Infrastructure only - resource tracking, plugin host access
+ *     infra._resources.track(() => console.log('cleanup'));
  *   },
- *   entrypoint: () => <MyPluginUI />,
+ *   entrypoint: () => {
+ *     // App services via hooks
+ *     const notifications = useNotifications();
+ *     const user = useUser();
+ *     return <MyPluginUI />;
+ *   },
  * });
  * ```
  */
@@ -60,25 +67,28 @@ export function definePlugin(plugin: AppPlugin): AppPlugin {
 // ---------------------------------------------------------------------------
 
 /**
- * Create a PluginManager pre-typed to AppContext.
+ * Create a PluginManager pre-typed to PluginInfrastructure.
  */
-export function createAppManager(context?: AppContext): PluginManager<AppContext> {
-  return new PluginManager<AppContext>(context);
+export function createAppManager(context?: PluginInfrastructure): PluginManager<PluginInfrastructure> {
+  return new PluginManager<PluginInfrastructure>(context);
 }
 
 /**
- * Create a PluginClient pre-typed to AppContext.
+ * Create a PluginClient pre-typed to PluginInfrastructure.
  */
 export function createAppClient(
-  options: PluginClientOptions<AppContext>
-): PluginClient<AppContext> {
-  return new PluginClient<AppContext>(options);
+  options: PluginClientOptions<PluginInfrastructure>
+): PluginClient<PluginInfrastructure> {
+  return new PluginClient<PluginInfrastructure>(options);
 }
 
 /**
- * Create a PluginHost pre-typed to AppContext and AppLayout.
+ * Create a PluginHost pre-typed to PluginInfrastructure.
  * The host manages the plugin registry and theme plugins.
+ * 
+ * Note: The host no longer needs app-specific context.
+ * App services are provided via separate React contexts.
  */
-export function createAppHost(context?: AppContext): PluginHost<AppContext> {
-  return new PluginHost<AppContext>(context);
+export function createAppHost(): PluginHost<PluginInfrastructure> {
+  return new PluginHost<PluginInfrastructure>();
 }

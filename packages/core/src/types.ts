@@ -1,5 +1,49 @@
 import type { ComponentType, ReactNode } from 'react';
 
+// Forward declarations to avoid circular dependencies
+export interface PluginHost<TContext = unknown> {
+  setThemePlugin(plugin: PluginModule<TContext> | null): void;
+  getThemePlugin(): PluginModule<TContext> | null;
+  getLayoutOverride(component: Function): Function | null;
+}
+
+export interface ResourceTracker {
+  track(cleanup: () => void): void;
+  cleanup(): void;
+}
+
+// ---------------------------------------------------------------------------
+// Plugin infrastructure context – minimal context for plugin lifecycle
+// ---------------------------------------------------------------------------
+
+/**
+ * Minimal plugin infrastructure context.
+ * This is the core functionality that React PKL provides to plugins.
+ * 
+ * Apps typically don't use this directly – instead they compose their own
+ * services and expose them via separate React contexts/hooks.
+ */
+export interface PluginInfrastructure {
+  /**
+   * The plugin host managing this plugin.
+   * Used for theme management and accessing other plugin functionality.
+   */
+  readonly host: PluginHost<any>;
+  
+  /**
+   * Resource tracker for automatic cleanup.
+   * Plugins can register cleanup functions that run when they're disabled.
+   * @internal
+   */
+  readonly _resources: ResourceTracker;
+  
+  /**
+   * Current plugin ID for resource tracking.
+   * @internal
+   */
+  readonly _pluginId: string;
+}
+
 // ---------------------------------------------------------------------------
 // Plugin descriptor – static metadata about a plugin
 // ---------------------------------------------------------------------------

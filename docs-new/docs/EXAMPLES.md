@@ -1,3 +1,8 @@
+---
+sidebar_position: 3
+title: Examples
+---
+
 # Examples Guide
 
 This guide explains the example applications and plugins included with React PKL.

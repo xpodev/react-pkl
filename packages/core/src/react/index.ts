@@ -19,4 +19,5 @@ export {
   useSlotComponents,
   usePluginHost,
   useCurrentPlugin,
+  createTypedHooks,
 } from './hooks.js';

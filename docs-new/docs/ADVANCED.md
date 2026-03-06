@@ -1,3 +1,8 @@
+---
+sidebar_position: 6
+title: Advanced Usage
+---
+
 # Advanced Usage Guide
 
 This guide covers advanced patterns and techniques for building sophisticated plugin systems with React PKL.

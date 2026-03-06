@@ -1,4 +1,10 @@
-export type { AppContext, LoggerService, NotificationService, PluginRoute, RouterService, UserInfo } from './app-context.js';
+export type {
+  NotificationService,
+  RouterService,
+  UserInfo,
+  LoggerService,
+  PluginRoute,
+} from './app-context.js';
 export {
   AppLayoutProvider,
   useAppLayout,

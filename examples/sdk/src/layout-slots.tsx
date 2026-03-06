@@ -1,5 +1,5 @@
 import { createLayoutSlot } from '@react-pkl/core/react';
-import { useAppContext } from './react/app-context.js';
+import { useRouter } from './react/services.js';
 import { useAppLayout } from './slots.js';
 
 /**
@@ -52,13 +52,13 @@ export const AppHeader = createLayoutSlot<{}>(
  */
 export const AppSidebar = createLayoutSlot<{}>(
   function DefaultSidebar() {
-    const context = useAppContext();
+    const router = useRouter();
     const layout = useAppLayout();
-    const pluginRoutes = context.router.getRoutes();
+    const pluginRoutes = router.getRoutes();
 
     const handleNavigate = (path: string) => (e: React.MouseEvent) => {
       e.preventDefault();
-      context.router.navigate(path);
+      router.navigate(path);
     };
 
     return (

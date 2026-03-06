@@ -1,10 +1,12 @@
 import type React from 'react';
-import type { ResourceTracker } from '@react-pkl/core';
 
 // ---------------------------------------------------------------------------
-// Services available to plugins via the host context
+// App Services – each exposed via separate React contexts
 // ---------------------------------------------------------------------------
 
+/**
+ * Notification service for showing toast messages
+ */
 export interface NotificationService {
   /**
    * Show a notification. Returns an id that can be used to dismiss it.
@@ -14,6 +16,9 @@ export interface NotificationService {
   dismiss(id: string): void;
 }
 
+/**
+ * Route definition for plugin-contributed pages
+ */
 export interface PluginRoute {
   /** Route path (e.g., '/settings', '/my-plugin/dashboard') */
   path: string;
@@ -23,6 +28,9 @@ export interface PluginRoute {
   label?: string;
 }
 
+/**
+ * Router service for SPA navigation
+ */
 export interface RouterService {
   /** Navigate to a path. */
   navigate(path: string): void;
@@ -44,6 +52,9 @@ export interface RouterService {
   getRoutes(): Map<string, PluginRoute>;
 }
 
+/**
+ * User information
+ */
 export interface UserInfo {
   readonly id: string;
   readonly name: string;
@@ -51,46 +62,11 @@ export interface UserInfo {
   readonly role: string;
 }
 
+/**
+ * Logger service for console output
+ */
 export interface LoggerService {
   log(...args: unknown[]): void;
   warn(...args: unknown[]): void;
   error(...args: unknown[]): void;
-}
-
-// ---------------------------------------------------------------------------
-// AppContext – the host context passed to every plugin on activation
-// ---------------------------------------------------------------------------
-
-export interface AppContext {
-  /** Show and dismiss notifications. */
-  notifications: NotificationService;
-  /** SPA-style navigation and route registration. */
-  router: RouterService;
-  /** Currently authenticated user, or null when anonymous. */
-  user: UserInfo | null;
-  /** Namespaced logger. */
-  logger: LoggerService;
-  /**
-   * Plugin host for theme management and layout control.
-   * Theme plugins can use this to register themselves:
-   * ```ts
-   * activate(context) {
-   *   context.pluginHost.setThemePlugin(this);
-   * }
-   * ```
-   */
-  pluginHost: import('@react-pkl/core').PluginHost<AppContext>;
-  /**
-   * Resource tracker for automatic cleanup.
-   * Plugins can register cleanup functions that run when they're disabled.
-   * 
-   * @internal - Typically set by the plugin manager
-   */
-  _resources?: ResourceTracker;
-  /**
-   * Current plugin ID for resource tracking.
-   * 
-   * @internal - Set by the plugin manager during activation
-   */
-  _currentPluginId?: string;
 }
