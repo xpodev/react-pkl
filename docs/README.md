@@ -32,24 +32,108 @@ If you're new to React PKL:
 
 This documentation is configured for GitHub Pages using Jekyll:
 
-- **Theme:** Cayman (defined in `_config.yml`)
+- **Theme:** just-the-docs (Material Design style)
 - **Configuration:** See `_config.yml` for settings
 - **Base URL:** `/react-pkl`
+- **Deployment:** Automatic via GitHub Actions (`.github/workflows/pages.yml`)
 
-### Local Preview
+### Local Development
 
 To preview the documentation locally with Jekyll:
 
+#### Prerequisites
+
+**Option 1: Using Ruby and Jekyll (Recommended)**
+
 ```bash
-# Install Jekyll (if not already installed)
+# Install Ruby (if not already installed)
+# Windows: Download from https://rubyinstaller.org/
+# macOS: brew install ruby
+# Linux: sudo apt-get install ruby-full
+
+# Install Bundler and Jekyll
 gem install bundler jekyll
+```
+
+**Option 2: Using Docker (Easier)**
+
+```bash
+# No Ruby installation needed, just Docker
+```
+
+#### Build and Serve
+
+**With Ruby/Jekyll:**
+
+```bash
+# Navigate to docs directory
+cd docs
+
+# Install dependencies (first time only)
+bundle install
 
 # Serve the documentation
-cd docs
-jekyll serve
+bundle exec jekyll serve
+
+# Or with live reload
+bundle exec jekyll serve --livereload
 ```
 
 Then visit `http://localhost:4000/react-pkl/`
+
+**With Docker:**
+
+```bash
+# From the docs directory
+docker run --rm -v "$PWD:/srv/jekyll" -p 4000:4000 jekyll/jekyll jekyll serve --watch
+```
+
+Then visit `http://localhost:4000/react-pkl/`
+
+#### Build Only (No Server)
+
+To build the static site without serving:
+
+```bash
+cd docs
+
+# With Jekyll
+bundle exec jekyll build
+
+# Output will be in _site/ directory
+```
+
+#### Troubleshooting
+
+**Port already in use:**
+```bash
+bundle exec jekyll serve --port 4001
+```
+
+**Theme not found:**
+```bash
+bundle install  # Reinstall dependencies
+```
+
+**Changes not appearing:**
+- Jekyll caches files - try `bundle exec jekyll clean` then rebuild
+- For `_config.yml` changes, restart the server
+
+#### Configuration Files
+
+- `_config.yml` - Jekyll configuration
+- `Gemfile` - Ruby dependencies (if you create one)
+- `.github/workflows/pages.yml` - GitHub Pages deployment workflow
+
+### Deployment
+
+Documentation is automatically deployed to GitHub Pages when you push to `main`:
+
+1. GitHub Actions workflow runs (`.github/workflows/pages.yml`)
+2. Jekyll builds the site
+3. Deploys to `https://xpodev.github.io/react-pkl/`
+
+No manual deployment needed!
 
 ## 📝 Contributing to Documentation
 

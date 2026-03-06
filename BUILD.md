@@ -1,13 +1,16 @@
 # Building React PKL
 
-This guide explains how to build the React PKL monorepo locally.
+This guide explains how to build the React PKL monorepo and documentation locally.
 
 ## Prerequisites
 
 - Node.js 18+ 
 - npm 7+ (for workspaces support)
+- Ruby 2.7+ and Bundler (for documentation only)
 
 ## Quick Start
+
+### Build Code
 
 ```bash
 # Install all dependencies
@@ -19,6 +22,21 @@ npm run build
 # Start the example app in development mode
 npm run dev:app
 ```
+
+### Build Documentation
+
+```bash
+# Navigate to docs
+cd docs
+
+# Install Jekyll dependencies (first time only)
+bundle install
+
+# Serve documentation locally
+bundle exec jekyll serve --livereload
+```
+
+Visit `http://localhost:4000/react-pkl/` to view the docs.
 
 ## Project Structure
 
@@ -237,6 +255,121 @@ For the best development experience:
    - Each package has its own `tsconfig.json`
 
 3. **Hot Module Replacement**: Works automatically with Vite in dev mode
+
+## Building Documentation
+
+The documentation is built with Jekyll and deployed to GitHub Pages.
+
+### Prerequisites
+
+**Option 1: Ruby and Jekyll**
+
+```bash
+# Install Ruby (if not already installed)
+# Windows: https://rubyinstaller.org/
+# macOS: brew install ruby
+# Linux: sudo apt-get install ruby-full
+
+# Install Bundler
+gem install bundler
+```
+
+**Option 2: Docker** (no Ruby needed)
+
+Just have Docker installed.
+
+### Local Development
+
+**With Ruby/Jekyll:**
+
+```bash
+# Navigate to docs directory
+cd docs
+
+# Install dependencies (first time only)
+bundle install
+
+# Serve with live reload
+bundle exec jekyll serve --livereload
+
+# Or without live reload
+bundle exec jekyll serve
+```
+
+**With Docker:**
+
+```bash
+# From the docs directory
+docker run --rm -v "$PWD:/srv/jekyll" -p 4000:4000 jekyll/jekyll jekyll serve --watch
+```
+
+Visit `http://localhost:4000/react-pkl/` to view the documentation.
+
+### Build Static Site
+
+To build the documentation without serving:
+
+```bash
+cd docs
+bundle exec jekyll build
+
+# Output in docs/_site/
+```
+
+### Documentation Structure
+
+```
+docs/
+├── _config.yml           # Jekyll configuration
+├── Gemfile              # Ruby dependencies
+├── index.md             # Documentation hub
+├── GETTING_STARTED.md   # Tutorial
+├── API.md               # API reference
+├── ARCHITECTURE.md      # Architecture guide
+├── THEME_SYSTEM.md      # Theme system guide
+└── ...                  # Other docs
+```
+
+### Making Changes
+
+1. Edit markdown files in `docs/`
+2. Jekyll automatically rebuilds (if using `--livereload`)
+3. Refresh browser to see changes
+
+**Note:** Changes to `_config.yml` require restarting Jekyll.
+
+### Deployment
+
+Documentation is automatically deployed via GitHub Actions:
+
+1. Push to `main` branch
+2. Workflow runs (`.github/workflows/pages.yml`)
+3. Jekyll builds the site
+4. Deploys to `https://xpodev.github.io/react-pkl/`
+
+No manual deployment needed!
+
+### Troubleshooting
+
+**Port 4000 already in use:**
+```bash
+bundle exec jekyll serve --port 4001
+```
+
+**Theme not found:**
+```bash
+cd docs
+rm -rf _site Gemfile.lock
+bundle install
+bundle exec jekyll serve
+```
+
+**Changes not appearing:**
+- Jekyll caches files - try stopping server and running:
+  ```bash
+  bundle exec jekyll clean
+  bundle exec jekyll serve
+  ```
 
 ## Common Commands Summary
 
