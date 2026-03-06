@@ -72,11 +72,11 @@ function SettingsToolbarButton() {
       style={{
         padding: '4px 10px',
         borderRadius: 4,
-        border: '1px solid #cbd5e1',
-        background: '#f8fafc',
+        border: '1px solid var(--border-color, #cbd5e1)',
+        background: 'var(--card-bg, #f8fafc)',
         cursor: 'pointer',
         fontSize: 13,
-        color: '#334155',
+        color: 'var(--text-primary, #334155)',
       }}
       title="Open Settings (Alt+,)"
     >

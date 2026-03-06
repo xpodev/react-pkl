@@ -1,5 +1,5 @@
 import type { PluginHost } from '@react-pkl/core';
-import type { AppContext, PluginRoute } from 'example-sdk';
+import type { AppContext } from 'example-sdk';
 import { useAppLayout } from 'example-sdk';
 import { PageLayout } from '../components/PageLayout.js';
 import { ThemeSelector } from '../components/ThemeSelector.js';
@@ -10,15 +10,13 @@ import { ThemeSelector } from '../components/ThemeSelector.js';
  * Displays application settings including theme selection and any plugin-contributed
  * settings sections.
  */
-export function SettingsPage({ host, pluginRoutes }: { host: PluginHost<AppContext>; pluginRoutes: Map<string, PluginRoute> }) {
+export function SettingsPage({ host }: { host: PluginHost<AppContext> }) {
   const layout = useAppLayout();
 
   return (
-    <PageLayout host={host} pluginRoutes={pluginRoutes} currentPath="/settings">
+    <PageLayout host={host} currentPath="/settings">
       <h2 style={{ marginTop: 0, color: 'var(--text-primary, inherit)' }}>Application Settings</h2>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-        {/* Theme Selection */}
-        <ThemeSelector host={host} />
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>\n        {/* Theme Selection */}\n        <ThemeSelector host={host} />
 
         <section style={{ padding: 16, background: 'var(--card-bg, #f8fafc)', borderRadius: 8 }}>
           <h3 style={{ marginTop: 0, fontSize: 16, color: 'var(--text-primary, inherit)' }}>General</h3>

@@ -56,6 +56,9 @@ export function createMockAppContext(
         routes?.delete(path);
         onRouteChange?.();
       },
+      getRoutes() {
+        return routes || new Map();
+      },
     },
 
     user: {

@@ -161,8 +161,8 @@ function AppWithRouter() {
 
                 {/* Routes */}
                 <Routes key={routeVersion}>
-                  <Route path="/" element={<Shell host={host} pluginRoutes={pluginRoutes} />} />
-                  <Route path="/settings" element={<SettingsPage host={host} pluginRoutes={pluginRoutes} />} />
+                  <Route path="/" element={<Shell host={host} />} />
+                  <Route path="/settings" element={<SettingsPage host={host} />} />
                   {/* Dynamic plugin routes */}
                   {Array.from(pluginRoutes.values()).map((route) => (
                     <Route key={route.path} path={route.path} element={<route.component />} />

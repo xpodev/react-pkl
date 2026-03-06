@@ -38,6 +38,10 @@ export interface RouterService {
    * Unregister a route by path (rarely needed - auto-cleanup handles this).
    */
   unregisterRoute(path: string): void;
+  /**
+   * Get all registered plugin routes.
+   */
+  getRoutes(): Map<string, PluginRoute>;
 }
 
 export interface UserInfo {

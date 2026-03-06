@@ -40,10 +40,10 @@ function HelloToolbarItem() {
     <span
       style={{
         padding: '4px 10px',
-        background: '#e0f2fe',
+        background: 'var(--card-bg-secondary, #e0f2fe)',
         borderRadius: 4,
         fontSize: 13,
-        color: '#0369a1',
+        color: 'var(--link-color, #0369a1)',
       }}
     >
       👋 Hello Plugin
