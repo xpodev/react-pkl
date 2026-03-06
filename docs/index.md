@@ -6,33 +6,31 @@ nav_order: 1
 
 # React PKL Documentation
 
-Welcome to the React PKL documentation! This guide will help you navigate all available documentation.
+Welcome to the React PKL v0.2.0 documentation! This guide will help you navigate all available documentation.
 
 > 🚀 **Quick Start**: Jump to [Getting Started Guide](./GETTING_STARTED) to build your first plugin system.
+> 
+> 🆕 **v0.2.0 Highlights**: Context-driven architecture, theme system with layout overrides, style context, and static plugin support!
 
 ## 📚 Documentation Overview
 
 ### For Getting Started
 
-1. **[Project Overview](../)** - Project overview, quick start, and feature summary
+1. **[Project Overview](../)** - Project overview, quick start, and feature summary (v0.2.0 updated)
 2. **[Getting Started Guide](./GETTING_STARTED)** - Step-by-step tutorial for creating your first plugin system
 3. **[Examples Guide](./EXAMPLES)** - Detailed walkthrough of example applications and plugins
 
 ### For Development
 
-4. **[API Reference](./API)** - Complete API documentation for all classes, methods, and types
+4. **[API Reference](./API)** - Complete API documentation for all classes, methods, and types (v0.2.0 updated)
 5. **[Quick Reference](./QUICK_REFERENCE)** - Fast lookup for common tasks and code snippets
 6. **[Advanced Usage](./ADVANCED)** - Advanced patterns, techniques, and best practices
-7. **[Theme System](./THEME_SYSTEM)** - Comprehensive guide to the theme system
+7. **[Theme System](./THEME_SYSTEM)** - Comprehensive guide to the v0.2.0 theme system ⭐ NEW
 
 ### For Understanding
 
-8. **[Architecture Overview](./ARCHITECTURE)** - System design, data flow, and architectural decisions
+8. **[Architecture Overview](./ARCHITECTURE)** - System design, data flow, and architectural decisions (v0.2.0 updated)
 9. **[Contributing Guide](./CONTRIBUTING)** - How to contribute to the project
-
-### For Tracking
-
-10. **[CHANGELOG](../CHANGELOG)** - Version history and release notes
 
 ## 📖 Reading Path by Role
 
@@ -40,22 +38,23 @@ Welcome to the React PKL documentation! This guide will help you navigate all av
 
 1. Start with the [Project Overview](../) to understand what React PKL is
 2. Read [Getting Started Guide](./GETTING_STARTED) to create your SDK
-3. Check [Examples Guide](./EXAMPLES) to see how it works in practice
-4. Refer to [API Reference](./API) as you build
-5. Use [Advanced Usage](./ADVANCED) for sophisticated features
-6. Explore [Theme System](./THEME_SYSTEM) for theming capabilities
+3. Review [Theme System](./THEME_SYSTEM) to understand theming capabilities (v0.2.0)
+4. Check [Examples Guide](./EXAMPLES) to see how it works in practice
+5. Refer to [API Reference](./API) as you build
+6. Use [Advanced Usage](./ADVANCED) for sophisticated features
 
 ### I'm developing plugins
 
 1. Your SDK should provide its own documentation
 2. Use [Quick Reference](./QUICK_REFERENCE) for common patterns
-3. Check [Examples Guide](./EXAMPLES) for plugin examples
-4. Refer to your SDK's documentation for context-specific APIs
+3. Check [Theme System](./THEME_SYSTEM) if building a theme plugin
+4. Check [Examples Guide](./EXAMPLES) for plugin examples
+5. Refer to your SDK's documentation for context-specific APIs
 
 ### I'm contributing to React PKL
 
 1. Read the [Project Overview](../) for project overview
-2. Study [Architecture Overview](./ARCHITECTURE) to understand the system
+2. Study [Architecture Overview](./ARCHITECTURE) to understand the v0.2.0 system
 3. Follow [Contributing Guide](./CONTRIBUTING) for development workflow
 4. Use [API Reference](./API) to understand the codebase
 
@@ -63,21 +62,104 @@ Welcome to the React PKL documentation! This guide will help you navigate all av
 
 1. Read the [Project Overview](../) for features and benefits
 2. Browse [Examples Guide](./EXAMPLES) to see it in action
-3. Check [Architecture Overview](./ARCHITECTURE) for design decisions
+3. Check [Architecture Overview](./ARCHITECTURE) for design decisions (v0.2.0 updated)
 4. Review [API Reference](./API) to assess API quality
+5. Explore [Theme System](./THEME_SYSTEM) to understand theming capabilities
+
+## 🆕 What's New in v0.2.0
+
+### Context-Driven Architecture
+Components use hooks instead of props, eliminating prop drilling:
+```tsx
+// Old
+<AppHeader toolbar={items} user={user} />
+
+// New
+function AppHeader() {
+  const { toolbar } = useAppLayout();
+  const { user } = useAppContext();
+}
+```
+
+### Theme System
+Plugins can override entire layout components:
+```typescript
+onThemeEnable(slots) {
+  slots.set(AppHeader, DarkHeader);
+  slots.set(AppSidebar, DarkSidebar);
+}
+```
+
+### Style Context
+Type-safe theme variables:
+```tsx
+const styles = useStyles();
+<div style={{ background: styles.bgPrimary }}>...</div>
+```
+
+### Static Plugins
+Plugins without lifecycle methods for simple extensions:
+```typescript
+export default {
+  meta: { id: 'toolbar', name: 'Toolbar', version: '1.0.0' },
+  entrypoint: () => <Button />
+};
+```
+
+See [Architecture](./ARCHITECTURE) and [Theme System](./THEME_SYSTEM) for full details.
 
 ## 📝 Document Summaries
 
 ### README.md
-**Length:** ~500 lines  
+**Length:** ~400 lines  
 **Audience:** Everyone  
+**Status:** Updated for v0.2.0 ✅  
 **Content:**
 - Project overview and features
-- Quick start examples
+- Quick start with v0.2.0 patterns
 - Installation instructions
-- Basic usage patterns
-- Architecture modes (standalone/client)
-- Core concepts (slots, context, cleanup)
+- Context-driven components
+- Theme system examples
+- Style context usage
+- Core concepts (slots, themes, cleanup)
+
+### API Reference
+**Length:** ~700 lines  
+**Audience:** Developers using the API  
+**Status:** Updated for v0.2.0 ✅  
+**Content:**
+- PluginHost API (new in v0.2.0)
+- Theme management methods
+- PluginModule interface with theme hooks
+- React hooks (useAppContext, useAppLayout, useStyles, etc.)
+- Style context API
+- Complete type definitions
+- Migration guide from v0.1.0
+
+### Architecture Overview
+**Length:** ~500 lines  
+**Audience:** System designers, contributors  
+**Status:** Updated for v0.2.0 ✅  
+**Content:**
+- v0.2.0 system architecture
+- PluginHost and theme management
+- Context-driven component pattern
+- Layout slots and overrides
+- Style context system
+- Data flow diagrams
+- Advanced patterns
+
+### Theme System Guide
+**Length:** ~500 lines  
+**Audience:** Theme plugin developers  
+**Status:** New in v0.2.0 ⭐  
+**Content:**
+- Complete theme system documentation
+- onThemeEnable/onThemeDisable hooks
+- Layout slot overrides
+- Style context integration
+- Dark theme implementation example
+- Best practices
 
 ### Getting Started Guide
 **Length:** ~800 lines  
@@ -89,15 +171,6 @@ Welcome to the React PKL documentation! This guide will help you navigate all av
 - React integration
 - First plugin creation
 - Building and testing
-
-### API Reference
-**Length:** ~900 lines  
-**Audience:** Developers using the API  
-**Content:**
-- Complete API documentation
-- All classes and methods
-- TypeScript type definitions
-- Parameter descriptions
 - Return value details
 - Usage examples
 
