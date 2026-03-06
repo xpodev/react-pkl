@@ -26,17 +26,25 @@ npm run dev:app
 ### Build Documentation
 
 ```bash
-# Navigate to docs
-cd docs
-
 # Install Jekyll dependencies (first time only)
-bundle install
+npm run docs:install
 
-# Serve documentation locally
-bundle exec jekyll serve --livereload
+# Serve documentation locally with live reload
+npm run docs
+
+# Or use the explicit command
+npm run docs:serve
 ```
 
 Visit `http://localhost:4000/react-pkl/` to view the docs.
+
+**Alternative (without npm):**
+
+```bash
+cd docs
+bundle install
+bundle exec jekyll serve --livereload
+```
 
 ## Project Structure
 
@@ -280,7 +288,25 @@ Just have Docker installed.
 
 ### Local Development
 
-**With Ruby/Jekyll:**
+**Using npm scripts (Recommended):**
+
+```bash
+# Install Jekyll dependencies (first time only)
+npm run docs:install
+
+# Serve with live reload
+npm run docs
+# or
+npm run docs:serve
+
+# Build static site
+npm run docs:build
+
+# Clean build artifacts
+npm run docs:clean
+```
+
+**Direct Jekyll commands:**
 
 ```bash
 # Navigate to docs directory
@@ -307,7 +333,13 @@ Visit `http://localhost:4000/react-pkl/` to view the documentation.
 
 ### Build Static Site
 
-To build the documentation without serving:
+**Using npm:**
+
+```bash
+npm run docs:build
+```
+
+**Direct Jekyll:**
 
 ```bash
 cd docs
@@ -373,15 +405,33 @@ bundle exec jekyll serve
 
 ## Common Commands Summary
 
+### Code Build Commands
+
 | Command | Description |
 |---------|-------------|
 | `npm install` | Install all dependencies |
 | `npm run build` | Build everything |
 | `npm run build:packages` | Build core and SDK packages |
 | `npm run build:examples` | Build example SDK and plugins |
+| `npm run build:app` | Build example app (production) |
+| `npm run build:all` | Full build of everything |
 | `npm run dev:app` | Start dev server for example app |
+| `npm run dev:core` | Watch mode for core package |
+| `npm run dev:sdk` | Watch mode for SDK package |
+| `npm run dev:example-sdk` | Watch mode for example SDK |
+| `npm run dev:plugins` | Watch mode for example plugins |
+| `npm run clean` | Clean workspace build artifacts |
 | `npm run clean:all` | Remove all build artifacts |
-| `npm run build:all` | Full clean build of everything |
+
+### Documentation Commands
+
+| Command | Description |
+|---------|-------------|
+| `npm run docs:install` | Install Jekyll dependencies |
+| `npm run docs` | Serve docs with live reload |
+| `npm run docs:serve` | Serve docs with live reload |
+| `npm run docs:build` | Build static documentation site |
+| `npm run docs:clean` | Clean documentation build artifacts |
 
 ## CI/CD
 

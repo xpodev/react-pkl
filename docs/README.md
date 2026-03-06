@@ -63,7 +63,23 @@ gem install bundler jekyll
 
 #### Build and Serve
 
-**With Ruby/Jekyll:**
+**Using npm scripts (from project root):**
+
+```bash
+# Install Jekyll dependencies (first time only)
+npm run docs:install
+
+# Serve with live reload
+npm run docs
+
+# Build static site
+npm run docs:build
+
+# Clean artifacts
+npm run docs:clean
+```
+
+**With Ruby/Jekyll (from docs directory):**
 
 ```bash
 # Navigate to docs directory
