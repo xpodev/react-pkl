@@ -628,111 +628,6 @@ export default App;
 > - Plugins access services via hooks (`useNotifications()`, `useRouter()`, etc.)
 > - The plugin host is passed to `AppPluginProvider`
 > - Slot providers wrap the areas where plugins can inject content
-import { createAppContext } from './services/context.js';
-import { NotificationService } from './services/notifications.js';
-
-const App = () => {
-  return (
-    <BrowserRouter>
-      <AppContent />
-    </BrowserRouter>
-  );
-};
-
-const AppContent = () => {
-  const navigate = useNavigate();
-  const location = useLocation();
-  
-  // Services
-  const [notificationService] = useState(() => new NotificationService());
-  const [notifications, setNotifications] = useState([]);
-
-  useEffect(() => {
-    return notificationService.subscribe(setNotifications);
-  }, [notificationService]);
-
-  // Create context
-  const appContext = useMemo(() => createAppContext(
-    notificationService,
-    navigate,
-    () => location.pathname,
-    {
-      get: async (endpoint) => {
-        const res = await fetch(`/api${endpoint}`);
-        return res.json();
-      },
-      post: async (endpoint, data) => {
-        const res = await fetch(`/api${endpoint}`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(data),
-        });
-        return res.json();
-      },
-    },
-    { id: '1', name: 'John Doe', email: 'john@example.com', role: 'admin' }
-  ), [notificationService, navigate, location.pathname]);
-
-  // Create plugin host (v0.2.0)
-  const [host] = useState(() => createAppHost(appContext));
-
-  // Load plugins
-  useEffect(() => {
-    async function loadPlugins() {
-      await host.add(() => import('./plugins/hello-plugin.js'), { enabled: true });
-      await host.add(() => import('./plugins/dashboard-plugin.js'), { enabled: true });
-    }
-    loadPlugins();
-  }, [host]);
-
-  return (
-    <PluginProvider manager={host} context={appContext}>
-      <AppLayoutProvider>
-        <ToolbarSlotProvider>
-          <SidebarSlotProvider>
-            <DashboardSlotProvider>
-              <AppLayout />
-              
-              {/* Notifications */}
-              <div className="notifications">
-                {notifications.map(n => (
-                  <div key={n.id} className={`notification ${n.type}`}>
-                    {n.message}
-                  </div>
-                ))}
-              </div>
-            </DashboardSlotProvider>
-          </SidebarSlotProvider>
-        </ToolbarSlotProvider>
-      </AppLayoutProvider>
-    </PluginProvider>
-  );
-};
-
-// Layout component that uses layout slots
-const AppLayout = () => {
-  return (
-    <div className="app">
-      {/* Header - gets toolbar from context via useAppLayout() */}
-      <AppHeader />
-
-      <div className="layout">
-        {/* Sidebar - gets sidebar items from context via useAppLayout() */}
-        <AppSidebar />
-        
-        {/* Main content - gets dashboard widgets from context via useAppLayout() */}
-        <main>
-          <AppDashboard />
-        </main>
-      </div>
-    </div>
-  );
-};
-
-export default App;
-```
-
-> **Important:** The slot providers (`ToolbarSlotProvider`, etc.) must wrap the parts of your app where those slots are rendered. This allows plugins to use slot Items (like `<ToolbarItem>`) to register content that appears in the correct place. The layout slot components (`AppHeader`, `AppSidebar`, `AppDashboard`) internally use `useAppLayout()` to retrieve the content from the context.
 
 ## Writing Your First Plugin
 
@@ -857,7 +752,7 @@ Now that you have a working plugin system:
 Check out these guides:
 - [API Reference](./API.md)
 - [Advanced Usage](./ADVANCED.md)
-- [Examples](../examples/)
+- [GitHub Examples](https://github.com/xpodev/react-pkl/tree/main/examples)
 
 ## Common Patterns
 

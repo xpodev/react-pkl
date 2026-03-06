@@ -908,7 +908,7 @@ await buildPlugin({
 
 ## Examples
 
-See the [examples directory](../examples) for complete working examples:
+See the [examples on GitHub](https://github.com/xpodev/react-pkl/tree/main/examples) for complete working examples:
 - **examples/app** - Host application with plugin system
 - **examples/plugins** - Various plugin types (standard, theme, static)
 - **examples/sdk** - Custom SDK implementation
