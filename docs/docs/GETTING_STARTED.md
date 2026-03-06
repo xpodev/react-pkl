@@ -54,45 +54,50 @@ React PKL uses a **three-layer architecture**:
 
 ## Creating Your SDK
 
-### Step 1: Define Your Application Context
+### Step 1: Define Your Service Interfaces
 
-First, define what APIs and services you'll expose to plugins:
+First, define the service interfaces you'll expose to plugins. Each service will have its own React context and hook:
 
 ```typescript
 // my-app-sdk/src/app-context.ts
 
 /**
- * The context provided to all plugins when they activate.
- * This defines what your plugins can access.
+ * Notification service for showing messages to users
  */
-export interface AppContext {
-  // Notification system
-  notifications: {
-    show(message: string, type?: 'info' | 'success' | 'warning' | 'error'): string;
-    dismiss(id: string): void;
-  };
+export interface NotificationService {
+  show(message: string, type?: 'info' | 'success' | 'warning' | 'error'): string;
+  dismiss(id: string): void;
+}
 
-  // Navigation/routing
-  router: {
-    navigate(path: string): void;
-    getCurrentPath(): string;
-  };
+/**
+ * Router service for navigation
+ */
+export interface RouterService {
+  navigate(path: string): void;
+  getCurrentPath(): string;
+}
 
-  // Data access
-  api: {
-    get<T>(endpoint: string): Promise<T>;
-    post<T>(endpoint: string, data: unknown): Promise<T>;
-  };
+/**
+ * User information
+ */
+export interface UserInfo {
+  id: string;
+  name: string;
+  email: string;
+  role: 'admin' | 'user';
+}
 
-  // User info
-  user: {
-    id: string;
-    name: string;
-    email: string;
-    role: 'admin' | 'user';
-  } | null;
+/**
+ * Logger service for debugging
+ */
+export interface LoggerService {
+  log(message: string): void;
+  warn(message: string): void;
+  error(message: string): void;
 }
 ```
+
+> **Architecture Note:** Instead of bundling all services into a single context, we create separate service interfaces that will each have their own React context. This keeps the plugin infrastructure minimal and allows plugins to opt-in to only the services they need.
 
 ### Step 2: Define Layout Interface
 
@@ -216,60 +221,125 @@ Make it easy for plugin developers to use your SDK:
 
 ```typescript
 // my-app-sdk/src/plugin.ts
-import { PluginHost } from '@react-pkl/core';
+import { PluginHost, PluginInfrastructure } from '@react-pkl/core';
 import type { PluginModule } from '@react-pkl/core';
-import type { AppContext } from './app-context.js';
 
-// Type alias for your plugins
-export type AppPlugin = PluginModule<AppContext>;
+// Type alias for your plugins - uses minimal PluginInfrastructure
+export type AppPlugin = PluginModule<PluginInfrastructure>;
 
 // Helper function for type inference
 export function definePlugin(plugin: AppPlugin): AppPlugin {
   return plugin;
 }
 
-// Factory for creating the plugin host (v0.2.0)
-export function createAppHost(context: AppContext) {
-  return new PluginHost<AppContext>(context);
+// Factory for creating the plugin host (v0.3.0)
+export function createAppHost() {
+  return new PluginHost<PluginInfrastructure>();
 }
 ```
 
-### Step 6: Create React Hooks and Context
+> **What is PluginInfrastructure?** It's a minimal context type exported by `@react-pkl/core` containing only the essential plugin system infrastructure: `host` (PluginHost), `_resources` (ResourceTracker), and `_pluginId` (string). Your app services are provided separately via React context.
 
-Provide React integration with app-specific typed hooks:
+### Step 6: Create React Service Contexts
+
+Provide each service as a separate React context with provider and hook:
 
 ```typescript
-// my-app-sdk/src/react/app-context.ts
-import { createContext, useContext } from 'react';
-import type { AppContext } from '../app-context.js';
+// my-app-sdk/src/react/services.tsx
+import { createContext, useContext, type ReactNode } from 'react';
+import type { NotificationService, RouterService, UserInfo, LoggerService } from '../app-context.js';
 
-const AppReactContext = createContext<AppContext | null>(null);
-AppReactContext.displayName = 'AppContext';
+// Notifications Context
+const NotificationsContext = createContext<NotificationService | null>(null);
+NotificationsContext.displayName = 'NotificationsContext';
 
-export { AppReactContext };
+export function NotificationsProvider({ 
+  value, 
+  children 
+}: { 
+  value: NotificationService; 
+  children: ReactNode;
+}) {
+  return <NotificationsContext.Provider value={value}>{children}</NotificationsContext.Provider>;
+}
 
-/**
- * Access the app context from inside any plugin component.
- * Must be used within the PluginProvider.
- */
-export function useAppContext(): AppContext {
-  const ctx = useContext(AppReactContext);
-  if (!ctx) {
-    throw new Error('useAppContext must be used inside PluginProvider with AppContext');
-  }
+export function useNotifications(): NotificationService {
+  const ctx = useContext(NotificationsContext);
+  if (!ctx) throw new Error('useNotifications must be used within NotificationsProvider');
+  return ctx;
+}
+
+// Router Context
+const RouterContext = createContext<RouterService | null>(null);
+RouterContext.displayName = 'RouterContext';
+
+export function RouterProvider({ 
+  value, 
+  children 
+}: { 
+  value: RouterService; 
+  children: ReactNode;
+}) {
+  return <RouterContext.Provider value={value}>{children}</RouterContext.Provider>;
+}
+
+export function useRouter(): RouterService {
+  const ctx = useContext(RouterContext);
+  if (!ctx) throw new Error('useRouter must be used within RouterProvider');
+  return ctx;
+}
+
+// User Context
+const UserContext = createContext<UserInfo | null>(null);
+UserContext.displayName = 'UserContext';
+
+export function UserProvider({ 
+  value, 
+  children 
+}: { 
+  value: UserInfo | null; 
+  children: ReactNode;
+}) {
+  return <UserContext.Provider value={value}>{children}</UserContext.Provider>;
+}
+
+export function useUser(): UserInfo | null {
+  const ctx = useContext(UserContext);
+  return ctx; // null is a valid value for logged-out state
+}
+
+// Logger Context
+const LoggerContext = createContext<LoggerService | null>(null);
+LoggerContext.displayName = 'LoggerContext';
+
+export function LoggerProvider({ 
+  value, 
+  children 
+}: { 
+  value: LoggerService; 
+  children: ReactNode;
+}) {
+  return <LoggerContext.Provider value={value}>{children}</LoggerContext.Provider>;
+}
+
+export function useLogger(): LoggerService {
+  const ctx = useContext(LoggerContext);
+  if (!ctx) throw new Error('useLogger must be used within LoggerProvider');
   return ctx;
 }
 ```
 
+> **Why separate contexts?** This approach keeps the plugin infrastructure minimal and allows plugins to selectively use only the services they need via hooks. It's easier to extend, test, and maintain.
+
+### Step 6.5: Create Typed Plugin Hooks
+
+Create a simple hooks file that uses `createTypedHooks` to generate typed plugin management hooks:
+
 ```typescript
 // my-app-sdk/src/react/hooks.ts
-import { createTypedHooks } from '@react-pkl/core/react';
-import type { AppContext } from '../app-context.js';
+import { createTypedHooks, PluginInfrastructure } from '@react-pkl/core/react';
 
-// Re-export useAppContext
-export { useAppContext } from './app-context.js';
-
-// Create typed hooks for AppContext
+// Create typed hooks for PluginInfrastructure
 export const {
   usePlugins: useAppPlugins,
   useEnabledPlugins: useEnabledAppPlugins,
@@ -277,10 +347,21 @@ export const {
   usePluginMeta: useAppPluginMeta,
   usePluginHost: useAppPluginHost,
   useCurrentPlugin: useCurrentAppPlugin,
-} = createTypedHooks<AppContext>();
+} = createTypedHooks<PluginInfrastructure>();
 ```
 
->**Note:** The `createTypedHooks<TContext>()` factory automatically creates typed wrappers for all plugin hooks, eliminating boilerplate and providing better type inference for plugin developers.
+> **Note:** The `createTypedHooks<TContext>()` factory automatically creates typed wrappers for all plugin management hooks. Since we're using `PluginInfrastructure` (the minimal context), these hooks are focused purely on plugin lifecycle management, not app services.
+
+### Step 6.6: Create Plugin Provider
+
+Create a simple re-export of the core PluginProvider:
+
+```typescript
+// my-app-sdk/src/react/provider.tsx
+export { PluginProvider as AppPluginProvider } from '@react-pkl/core/react';
+```
+
+> **Simple!** Since we're using the core infrastructure and separate service contexts, we don't need a custom provider wrapper.
 
 ### Step 7: Export Everything
 
@@ -288,7 +369,7 @@ Create the main export files for your SDK:
 
 ```typescript
 // my-app-sdk/src/index.ts - Main SDK exports
-export type { AppContext, NotificationService, RouterService, LoggerService, UserInfo } from './app-context.js';
+export type { NotificationService, RouterService, LoggerService, UserInfo } from './app-context.js';
 export type { AppLayout } from './app-layout.js';
 
 export { 
@@ -315,32 +396,49 @@ export {
   definePlugin, 
   createAppHost,
   type AppPlugin,
-  type AppPluginLoader,
 } from './plugin.js';
 
 // Re-export for convenience
-export type { PluginMeta } from '@react-pkl/core';
+export type { PluginMeta, PluginInfrastructure } from '@react-pkl/core';
 ```
 
 ```typescript
 // my-app-sdk/src/react/index.ts - React-specific exports
 export { AppPluginProvider } from './provider.js';
 
+// Export plugin management hooks
 export {
-  useAppContext,
-  useAppPlugin,
-  useAppPluginMeta,
   useAppPlugins,
   useEnabledAppPlugins,
+  useAppPlugin,
+  useAppPluginMeta,
   useAppPluginHost,
   useCurrentAppPlugin,
 } from './hooks.js';
+
+// Export service providers and hooks
+export {
+  NotificationsProvider,
+  useNotifications,
+  RouterProvider,
+  useRouter,
+  UserProvider,
+  useUser,
+  LoggerProvider,
+  useLogger,
+} from './services.js';
+  useRouter,
+  UserProvider,
+  useUser,
+  LoggerProvider,
+  useLogger,
+} from './services.js';
 
 // Re-export PluginEntrypoints for rendering plugin UI
 export { PluginEntrypoints } from '@react-pkl/core/react';
 ```
 
-> **Note:** The main `index.ts` exports types, contexts, slots, and helpers. The `react/index.ts` exports React-specific hooks and providers. This separation allows plugin developers to choose what they need.
+> **Note:** The main `index.ts` exports types, slots, and plugin helpers. The `react/index.ts` exports React-specific hooks, providers, and service contexts. This modular structure allows plugin developers to import exactly what they need.
 
 ### Step 8: Configure package.json
 
@@ -362,7 +460,7 @@ export { PluginEntrypoints } from '@react-pkl/core/react';
     }
   },
   "peerDependencies": {
-    "@react-pkl/core": "^0.2.0",
+    "@react-pkl/core": "^0.3.0",
     "react": ">=18.0.0"
   }
 }
@@ -370,78 +468,75 @@ export { PluginEntrypoints } from '@react-pkl/core/react';
 
 ## Integrating with Your React App
 
-### Step 1: Create Application Services
+### Step 1: Create Service Implementations
 
-Implement the services defined in your `AppContext`:
+Implement the service interfaces you defined:
 
 ```typescript
 // app/src/services/notifications.ts
-export class NotificationService {
-  private listeners = new Set<(notifications: Notification[]) => void>();
-  private notifications: Notification[] = [];
+import type { NotificationService } from 'my-app-sdk';
 
-  show(message: string, type = 'info') {
-    const id = Math.random().toString(36);
-    this.notifications.push({ id, message, type });
-    this.notify();
-    
-    // Auto-dismiss after 3 seconds
-    setTimeout(() => this.dismiss(id), 3000);
-    return id;
-  }
+export function createNotificationService(): NotificationService {
+  const listeners = new Set<() => void>();
+  let notifications: Array<{ id: string; message: string; type: string }> = [];
 
-  dismiss(id: string) {
-    this.notifications = this.notifications.filter(n => n.id !== id);
-    this.notify();
-  }
-
-  subscribe(listener: (notifications: Notification[]) => void) {
-    this.listeners.add(listener);
-    return () => this.listeners.delete(listener);
-  }
-
-  private notify() {
-    this.listeners.forEach(listener => listener(this.notifications));
-  }
-}
-```
-
-```typescript
-// app/src/services/context.ts
-import type { AppContext } from 'my-app-sdk';
-import { NotificationService } from './notifications.js';
-
-export function createAppContext(
-  notificationService: NotificationService,
-  navigate: (path: string) => void,
-  getCurrentPath: () => string,
-  api: AppContext['api'],
-  user: AppContext['user']
-): AppContext {
   return {
-    notifications: {
-      show: (msg, type) => notificationService.show(msg, type),
-      dismiss: (id) => notificationService.dismiss(id),
+    show(message: string, type = 'info') {
+      const id = Math.random().toString(36);
+      notifications.push({ id, message, type });
+      listeners.forEach(fn => fn());
+      
+      // Auto-dismiss after 3 seconds
+      setTimeout(() => this.dismiss(id), 3000);
+      return id;
     },
-    router: {
-      navigate,
-      getCurrentPath,
+    dismiss(id: string) {
+      notifications = notifications.filter(n => n.id !== id);
+      listeners.forEach(fn => fn());
     },
-    api,
-    user,
   };
 }
 ```
 
-### Step 2: Set Up the Plugin Host
+```typescript
+// app/src/services/router.ts
+import type { RouterService } from 'my-app-sdk';
+
+export function createRouterService(
+  navigate: (path: string) => void,
+  getCurrentPath: () => string
+): RouterService {
+  return { navigate, getCurrentPath };
+}
+```
+
+```typescript
+// app/src/services/logger.ts
+import type { LoggerService } from 'my-app-sdk';
+
+export function createLoggerService(): LoggerService {
+  return {
+    log: (msg) => console.log(`[App] ${msg}`),
+    warn: (msg) => console.warn(`[App] ${msg}`),
+    error: (msg) => console.error(`[App] ${msg}`),
+  };
+}
+```
+
+### Step 2: Set Up the Plugin Host and Providers
+
+Compose your app with service providers and the plugin system:
 
 ```tsx
 // app/src/App.tsx
 import { useState, useEffect, useMemo } from 'react';
-import { BrowserRouter, useNavigate, useLocation } from 'react-router-dom';
 import { 
-  PluginProvider,
+  AppPluginProvider,
   AppLayoutProvider,
+  NotificationsProvider,
+  RouterProvider,
+  UserProvider,
+  LoggerProvider,
   ToolbarSlotProvider,
   SidebarSlotProvider,
   DashboardSlotProvider,
@@ -450,6 +545,89 @@ import {
   AppDashboard,
 } from 'my-app-sdk/react';
 import { createAppHost } from 'my-app-sdk';
+import { createNotificationService } from './services/notifications.js';
+import { createRouterService } from './services/router.js';
+import { createLoggerService } from './services/logger.js';
+
+function App() {
+  // Create plugin host (no context needed)
+  const host = useMemo(() => createAppHost(), []);
+  
+  // Create service instances
+  const notifications = useMemo(() => createNotificationService(), []);
+  const router = useMemo(() => createRouterService(
+    (path) => console.log('Navigate to:', path),
+    () => window.location.pathname
+  ), []);
+  const logger = useMemo(() => createLoggerService(), []);
+  const [user, setUser] = useState(null);
+
+  // Load plugins on mount
+  useEffect(() => {
+    async function loadPlugins() {
+      try {
+        // Load plugins (fetch from server, local imports, etc.)
+        const pluginModules = await Promise.all([
+          import('./plugins/hello.js'),
+          import('./plugins/theme-toggle.js'),
+        ]);
+        
+        pluginModules.forEach(module => {
+          host.register(module.default);
+        });
+        
+        // Enable all plugins by default
+        host.getPlugins().forEach(plugin => {
+          host.enable(plugin.id);
+        });
+      } catch (error) {
+        console.error('Failed to load plugins:', error);
+      }
+    }
+    
+    loadPlugins();
+  }, [host]);
+
+  return (
+    <NotificationsProvider value={notifications}>
+      <RouterProvider value={router}>
+        <UserProvider value={user}>
+          <LoggerProvider value={logger}>
+            <AppPluginProvider host={host}>
+              <AppLayoutProvider>
+                <ToolbarSlotProvider>
+                  <SidebarSlotProvider>
+                    <DashboardSlotProvider>
+                      <div style={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
+                        <AppHeader />
+                        <div style={{ display: 'flex', flex: 1 }}>
+                          <AppSidebar />
+                          <main style={{ flex: 1, padding: '2rem' }}>
+                            <AppDashboard />
+                          </main>
+                        </div>
+                      </div>
+                    </DashboardSlotProvider>
+                  </SidebarSlotProvider>
+                </ToolbarSlotProvider>
+              </AppLayoutProvider>
+            </AppPluginProvider>
+          </LoggerProvider>
+        </UserProvider>
+      </RouterProvider>
+    </NotificationsProvider>
+  );
+}
+
+export default App;
+```
+
+> **Key Points:**
+> - `createAppHost()` no longer needs a context parameter
+> - Each service has its own provider wrapping the plugin system
+> - Plugins access services via hooks (`useNotifications()`, `useRouter()`, etc.)
+> - The plugin host is passed to `AppPluginProvider`
+> - Slot providers wrap the areas where plugins can inject content
 import { createAppContext } from './services/context.js';
 import { NotificationService } from './services/notifications.js';
 
@@ -563,7 +741,7 @@ Now plugin developers can create plugins using your SDK:
 ```tsx
 // plugins/hello-plugin/src/index.tsx
 import { definePlugin } from 'my-app-sdk';
-import { ToolbarItem, useAppContext } from 'my-app-sdk/react';
+import { ToolbarItem, useNotifications, useLogger } from 'my-app-sdk/react';
 
 /**
  * A simple Hello World plugin
@@ -576,10 +754,12 @@ export default definePlugin({
     description: 'A simple greeting plugin',
   },
 
-  activate(context) {
+  activate(infra) {
     // Called when the plugin is enabled
+    // infra contains: host, _resources, _pluginId
     console.log('[HelloPlugin] Activated!');
-    context.notifications.show('Hello World Plugin is now active!', 'success');
+    // Note: Can't use React hooks in activate()
+    // Use hook-based side effects in components instead
   },
 
   deactivate() {
@@ -594,19 +774,27 @@ export default definePlugin({
   ),
 });
 
-// Components can use your SDK's hooks
+// Components can use service hooks
 const HelloButton = () => {
-  const context = useAppContext();
+  const notifications = useNotifications();
+  const logger = useLogger();
   
   return (
     <button onClick={() => {
-      context.notifications.show('Hello from the plugin!', 'info');
+      notifications.show('Hello from the plugin!', 'info');
+      logger.log('Hello button clicked');
     }}>
       👋 Hello
     </button>
   );
 };
 ```
+
+> **Key Points:**
+> - Plugins receive `PluginInfrastructure` (not full app context) in `activate()`
+> - Components use service hooks: `useNotifications()`, `useRouter()`, `useUser()`, `useLogger()`
+> - Each plugin only imports the hooks it needs
+> - Services are optional - plugins can work without them
 
 ## Building Plugins
 
