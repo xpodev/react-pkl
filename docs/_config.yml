@@ -1,0 +1,66 @@
+# GitHub Pages Jekyll Configuration for React PKL Documentation
+
+# Site settings
+title: React PKL
+description: A typesafe plugin system for React applications
+baseurl: "/react-pkl"
+url: "https://xpodev.github.io"
+
+# Build settings
+theme: jekyll-theme-cayman
+markdown: kramdown
+kramdown:
+  input: GFM
+  syntax_highlighter: rouge
+
+# Navigation
+navigation:
+  - title: Home
+    url: /
+  - title: Getting Started
+    url: /GETTING_STARTED
+  - title: API Reference
+    url: /API
+  - title: Examples
+    url: /EXAMPLES
+  - title: Architecture
+    url: /ARCHITECTURE
+  - title: Theme System
+    url: /THEME_SYSTEM
+
+# Exclude from processing
+exclude:
+  - node_modules/
+  - vendor/
+  - .git/
+  - .gitignore
+  - package.json
+  - package-lock.json
+  - tsconfig.json
+  - README.md
+
+# Include
+include:
+  - _config.yml
+
+# Plugins
+plugins:
+  - jekyll-optional-front-matter
+  - jekyll-readme-index
+  - jekyll-relative-links
+  - jekyll-titles-from-headings
+
+# Optional front matter
+optional_front_matter:
+  remove_originals: false
+
+# Relative links
+relative_links:
+  enabled: true
+  collections: false
+
+# Titles from headings
+titles_from_headings:
+  enabled: true
+  strip_title: true
+  collections: false

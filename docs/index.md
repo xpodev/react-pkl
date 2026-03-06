@@ -1,60 +1,70 @@
-# Documentation Index
+---
+layout: default
+title: Documentation
+nav_order: 1
+---
+
+# React PKL Documentation
 
 Welcome to the React PKL documentation! This guide will help you navigate all available documentation.
+
+> 🚀 **Quick Start**: Jump to [Getting Started Guide](./GETTING_STARTED) to build your first plugin system.
 
 ## 📚 Documentation Overview
 
 ### For Getting Started
 
-1. **[README.md](../README.md)** - Project overview, quick start, and feature summary
-2. **[Getting Started Guide](./GETTING_STARTED.md)** - Step-by-step tutorial for creating your first plugin system
-3. **[Examples Guide](./EXAMPLES.md)** - Detailed walkthrough of example applications and plugins
+1. **[Project Overview](../)** - Project overview, quick start, and feature summary
+2. **[Getting Started Guide](./GETTING_STARTED)** - Step-by-step tutorial for creating your first plugin system
+3. **[Examples Guide](./EXAMPLES)** - Detailed walkthrough of example applications and plugins
 
 ### For Development
 
-4. **[API Reference](./API.md)** - Complete API documentation for all classes, methods, and types
-5. **[Quick Reference](./QUICK_REFERENCE.md)** - Fast lookup for common tasks and code snippets
-6. **[Advanced Usage](./ADVANCED.md)** - Advanced patterns, techniques, and best practices
+4. **[API Reference](./API)** - Complete API documentation for all classes, methods, and types
+5. **[Quick Reference](./QUICK_REFERENCE)** - Fast lookup for common tasks and code snippets
+6. **[Advanced Usage](./ADVANCED)** - Advanced patterns, techniques, and best practices
+7. **[Theme System](./THEME_SYSTEM)** - Comprehensive guide to the theme system
 
 ### For Understanding
 
-7. **[Architecture Overview](./ARCHITECTURE.md)** - System design, data flow, and architectural decisions
-8. **[Contributing Guide](./CONTRIBUTING.md)** - How to contribute to the project
+8. **[Architecture Overview](./ARCHITECTURE)** - System design, data flow, and architectural decisions
+9. **[Contributing Guide](./CONTRIBUTING)** - How to contribute to the project
 
 ### For Tracking
 
-9. **[CHANGELOG.md](../CHANGELOG.md)** - Version history and release notes
+10. **[CHANGELOG](../CHANGELOG)** - Version history and release notes
 
 ## 📖 Reading Path by Role
 
 ### I'm building a plugin system
 
-1. Start with [README.md](../README.md) to understand what React PKL is
-2. Read [Getting Started Guide](./GETTING_STARTED.md) to create your SDK
-3. Check [Examples Guide](./EXAMPLES.md) to see how it works in practice
-4. Refer to [API Reference](./API.md) as you build
-5. Use [Advanced Usage](./ADVANCED.md) for sophisticated features
+1. Start with the [Project Overview](../) to understand what React PKL is
+2. Read [Getting Started Guide](./GETTING_STARTED) to create your SDK
+3. Check [Examples Guide](./EXAMPLES) to see how it works in practice
+4. Refer to [API Reference](./API) as you build
+5. Use [Advanced Usage](./ADVANCED) for sophisticated features
+6. Explore [Theme System](./THEME_SYSTEM) for theming capabilities
 
 ### I'm developing plugins
 
 1. Your SDK should provide its own documentation
-2. Use [Quick Reference](./QUICK_REFERENCE.md) for common patterns
-3. Check [Examples Guide](./EXAMPLES.md) for plugin examples
+2. Use [Quick Reference](./QUICK_REFERENCE) for common patterns
+3. Check [Examples Guide](./EXAMPLES) for plugin examples
 4. Refer to your SDK's documentation for context-specific APIs
 
 ### I'm contributing to React PKL
 
-1. Read [README.md](../README.md) for project overview
-2. Study [Architecture Overview](./ARCHITECTURE.md) to understand the system
-3. Follow [Contributing Guide](./CONTRIBUTING.md) for development workflow
-4. Use [API Reference](./API.md) to understand the codebase
+1. Read the [Project Overview](../) for project overview
+2. Study [Architecture Overview](./ARCHITECTURE) to understand the system
+3. Follow [Contributing Guide](./CONTRIBUTING) for development workflow
+4. Use [API Reference](./API) to understand the codebase
 
 ### I'm evaluating React PKL
 
-1. Read [README.md](../README.md) for features and benefits
-2. Browse [Examples Guide](./EXAMPLES.md) to see it in action
-3. Check [Architecture Overview](./ARCHITECTURE.md) for design decisions
-4. Review [API Reference](./API.md) to assess API quality
+1. Read the [Project Overview](../) for features and benefits
+2. Browse [Examples Guide](./EXAMPLES) to see it in action
+3. Check [Architecture Overview](./ARCHITECTURE) for design decisions
+4. Review [API Reference](./API) to assess API quality
 
 ## 📝 Document Summaries
 
@@ -148,37 +158,40 @@ Welcome to the React PKL documentation! This guide will help you navigate all av
 ### I want to...
 
 **...understand what React PKL is**
-→ [README.md](../README.md)
+→ [Project Overview](../)
 
 **...create my first plugin system**
-→ [Getting Started Guide](./GETTING_STARTED.md)
+→ [Getting Started Guide](./GETTING_STARTED)
 
 **...look up a specific API**
-→ [API Reference](./API.md)
+→ [API Reference](./API)
 
 **...find a code snippet quickly**
-→ [Quick Reference](./QUICK_REFERENCE.md)
+→ [Quick Reference](./QUICK_REFERENCE)
 
 **...implement an advanced feature**
-→ [Advanced Usage](./ADVANCED.md)
+→ [Advanced Usage](./ADVANCED)
 
 **...see working examples**
-→ [Examples Guide](./EXAMPLES.md)
+→ [Examples Guide](./EXAMPLES)
+
+**...understand the theme system**
+→ [Theme System Guide](./THEME_SYSTEM)
 
 **...understand the architecture**
-→ [Architecture Overview](./ARCHITECTURE.md)
+→ [Architecture Overview](./ARCHITECTURE)
 
 **...contribute to the project**
-→ [Contributing Guide](./CONTRIBUTING.md)
+→ [Contributing Guide](./CONTRIBUTING)
 
 **...check version history**
-→ [CHANGELOG.md](../CHANGELOG.md)
+→ [CHANGELOG](../CHANGELOG)
 
 ## 💡 Tips for Using Documentation
 
 ### For Learning
 
-1. Start with README.md for overview
+1. Start with the Project Overview for overview
 2. Follow Getting Started Guide step-by-step
 3. Study Examples Guide to see real code
 4. Keep Quick Reference handy while coding
@@ -201,11 +214,11 @@ Welcome to the React PKL documentation! This guide will help you navigate all av
 ## 📦 Package-Specific Docs
 
 ### @react-pkl/core
-**Location:** [packages/core/README.md](../packages/core/README.md)  
+**Location:** [packages/core](../packages/core/)  
 **Content:** Core package overview, installation, basic usage
 
 ### @react-pkl/sdk
-**Location:** [packages/sdk/README.md](../packages/sdk/README.md)  
+**Location:** [packages/sdk](../packages/sdk/)  
 **Content:** Build tools overview, configuration options, examples
 
 ## 🆘 Getting Help
@@ -221,21 +234,21 @@ Welcome to the React PKL documentation! This guide will help you navigate all av
 
 1. Check this documentation index
 2. Search existing GitHub issues
-3. Review examples in [Examples Guide](./EXAMPLES.md)
-4. Try debugging with [Quick Reference](./QUICK_REFERENCE.md)
+3. Review examples in [Examples Guide](./EXAMPLES)
+4. Try debugging with [Quick Reference](./QUICK_REFERENCE)
 
 ## 🔄 Keeping Up to Date
 
-- **Changes:** Check [CHANGELOG.md](../CHANGELOG.md)
+- **Changes:** Check [CHANGELOG](../CHANGELOG)
 - **New features:** Watch GitHub releases
 - **Examples:** Browse [examples/](../examples/) directory
-- **Best practices:** Read [Advanced Usage](./ADVANCED.md)
+- **Best practices:** Read [Advanced Usage](./ADVANCED)
 
 ## ✅ Documentation Checklist
 
 When learning React PKL:
 
-- [ ] Read README.md
+- [ ] Read the Project Overview
 - [ ] Complete Getting Started Guide
 - [ ] Run and explore examples
 - [ ] Bookmark Quick Reference
@@ -275,14 +288,15 @@ All React PKL documentation follows these principles:
 
 **Choose your path:**
 
-- 🚀 [Get Started](./GETTING_STARTED.md) - Build your first plugin system
-- 📖 [Read Examples](./EXAMPLES.md) - Learn from working code
-- 🔧 [API Reference](./API.md) - Look up specific APIs
-- 🎓 [Advanced Usage](./ADVANCED.md) - Master advanced techniques
-- 🤝 [Contribute](./CONTRIBUTING.md) - Help improve React PKL
+- 🚀 [Get Started](./GETTING_STARTED) - Build your first plugin system
+- 📖 [Read Examples](./EXAMPLES) - Learn from working code
+- 🔧 [API Reference](./API) - Look up specific APIs
+- 🎨 [Theme System](./THEME_SYSTEM) - Master theming
+- 🎓 [Advanced Usage](./ADVANCED) - Master advanced techniques
+- 🤝 [Contribute](./CONTRIBUTING) - Help improve React PKL
 
 ---
 
 **Happy coding with React PKL!** 🎉
 
-For questions, issues, or contributions, visit [GitHub Repository](https://github.com/xpodev/react-pkl).
+For questions, issues, or contributions, visit the [GitHub Repository](https://github.com/xpodev/react-pkl).
