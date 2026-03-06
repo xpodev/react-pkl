@@ -8,8 +8,11 @@ import { useCallback } from 'react';
  * Demonstrates:
  * - Registering / cleaning up a global keyboard shortcut in activate/deactivate
  * - Using service hooks (`useRouter`, `useNotifications`) in components
- * - Resource cleanup on plugin disable
+ * - Proper resource cleanup with deactivate() hook
  */
+
+let _keydownHandler: ((e: KeyboardEvent) => void) | null = null;
+
 export default definePlugin({
   meta: {
     id: 'example.settings-shortcut',
@@ -31,11 +34,15 @@ export default definePlugin({
     };
 
     window.addEventListener('keydown', handler);
+    _keydownHandler = handler;
+  },
 
-    // Register cleanup with resource tracker
-    infra._resources.register(infra._pluginId, () => {
-      window.removeEventListener('keydown', handler);
-    });
+  deactivate() {
+    // Clean up keyboard listener
+    if (_keydownHandler) {
+      window.removeEventListener('keydown', _keydownHandler);
+      _keydownHandler = null;
+    }
   },
 
   entrypoint: () => (
