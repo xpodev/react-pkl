@@ -14,6 +14,19 @@ export {
   type AppLayout,
 } from './slots.js';
 export {
+  AppHeader,
+  AppSidebar,
+  AppDashboard,
+} from './layout-slots.js';
+export {
+  StyleProvider,
+  useStyles,
+  getCSSVariable,
+  readStyleVariablesFromCSS,
+  defaultStyleVariables,
+  type StyleVariables,
+} from './style-context.js';
+export {
   createAppClient,
   createAppManager,
   createAppHost,

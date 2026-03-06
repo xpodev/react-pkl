@@ -9,6 +9,8 @@ export type {
   RemotePluginDescriptor,
 } from './types.js';
 
+export { isStaticPlugin, isThemePlugin } from './types.js';
+
 export { PluginRegistry } from './plugin-registry.js';
 export { PluginManager } from './plugin-manager.js';
 export { PluginClient } from './plugin-client.js';

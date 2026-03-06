@@ -8,6 +8,9 @@ import {
   DashboardSlotProvider,
   SettingsSlotProvider,
   useAppLayout,
+  AppHeader,
+  AppSidebar,
+  AppDashboard,
 } from 'example-sdk';
 import { AppPluginProvider, useAppPluginMeta, PluginEntrypoints } from 'example-sdk/react';
 import { createMockAppContext } from './mock-context.js';
@@ -44,8 +47,9 @@ function AppWithRouter() {
     // Step 1: Create the plugin provider
     const provider = new LocalStoragePluginProvider();
     
-    // Step 2: Create the context (without plugins)
+    // Step 2: Create a placeholder context (will add pluginHost after)
     const appContext = createMockAppContext(
+      null as any, // Placeholder for pluginHost
       // onNotify
       (id, message, type) => {
         setNotifications((prev) => [...prev, { id, message, type }]);
@@ -65,6 +69,9 @@ function AppWithRouter() {
 
     // Step 3: Create the plugin host with context
     const pluginHost = createAppHost(appContext);
+    
+    // Step 4: Now set the pluginHost reference in the context
+    appContext.pluginHost = pluginHost;
     
     return { provider, host: pluginHost, context: appContext };
   });
@@ -103,10 +110,24 @@ function AppWithRouter() {
       for (const plugin of plugins) {
         await manager.add(plugin.loader, { enabled: plugin.enabled });
       }
+      
+      // Step 5: Restore saved theme from localStorage
+      const savedThemeId = localStorage.getItem('react-pkl:active-theme');
+      if (savedThemeId && savedThemeId !== 'default') {
+        // Find the theme plugin
+        const allPlugins = registry.getAll().map(e => e.module);
+        const themePlugin = allPlugins.find(
+          p => p.meta.id === savedThemeId && typeof p.onThemeEnable === 'function'
+        );
+        if (themePlugin) {
+          host.setThemePlugin(themePlugin);
+        }
+      }
+      
       setReady(true);
     }
     void loadPlugins();
-  }, [manager, provider]);
+  }, [manager, provider, registry, host]);
 
   if (!ready) return <p>Loading plugins…</p>;
 
@@ -143,7 +164,7 @@ function AppWithRouter() {
                 {/* Routes */}
                 <Routes key={routeVersion}>
                   <Route path="/" element={<Shell host={host} pluginRoutes={pluginRoutes} />} />
-                  <Route path="/settings" element={<SettingsPage pluginRoutes={pluginRoutes} />} />
+                  <Route path="/settings" element={<SettingsPage host={host} pluginRoutes={pluginRoutes} />} />
                   {/* Dynamic plugin routes */}
                   {Array.from(pluginRoutes.values()).map((route) => (
                     <Route key={route.path} path={route.path} element={<route.component />} />
@@ -188,84 +209,56 @@ function NotFoundPage() {
 }
 
 // ---------------------------------------------------------------------------
-// Shell – renders the application chrome with plugin slots
+// PageLayout – shared layout wrapper for all pages
+// ---------------------------------------------------------------------------
+
+function PageLayout({ 
+  host, 
+  pluginRoutes, 
+  currentPath, 
+  children 
+}: { 
+  host: PluginHost<AppContext>; 
+  pluginRoutes: Map<string, PluginRoute>; 
+  currentPath: string;
+  children: React.ReactNode;
+}) {
+  const layout = useAppLayout();
+
+  return (
+    <div style={{ fontFamily: 'system-ui, sans-serif', padding: 24 }}>
+      {/* Toolbar - themeable layout slot */}
+      <AppHeader toolbar={layout.toolbar} />
+
+      <div style={{ display: 'flex', gap: 24 }}>
+        {/* Sidebar - themeable layout slot */}
+        <AppSidebar pluginRoutes={pluginRoutes} sidebarItems={layout.sidebar} Link={Link} />
+
+        {/* Main content */}
+        <main style={{ flex: 1 }}>
+          {children}
+        </main>
+      </div>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Shell – home page
 // ---------------------------------------------------------------------------
 
 function Shell({ host, pluginRoutes }: { host: PluginHost<AppContext>; pluginRoutes: Map<string, PluginRoute> }) {
   const layout = useAppLayout();
 
   return (
-    <div style={{ fontFamily: 'system-ui, sans-serif', padding: 24 }}>
-      {/* Toolbar */}
-      <header
-        style={{
-          display: 'flex',
-          gap: 8,
-          alignItems: 'center',
-          padding: '8px 16px',
-          background: '#f1f5f9',
-          borderRadius: 8,
-          marginBottom: 24,
-        }}
-      >
-        <strong style={{ marginRight: 'auto' }}>My App</strong>
-        {/* Render toolbar components from layout */}
-        {layout.toolbar}
-      </header>
+    <PageLayout host={host} pluginRoutes={pluginRoutes} currentPath="/">
+      <h2 style={{ marginTop: 0, color: 'var(--text-primary, inherit)' }}>Dashboard</h2>
+      
+      {/* Dashboard - themeable layout slot */}
+      <AppDashboard dashboardItems={layout.dashboard} />
 
-      <div style={{ display: 'flex', gap: 24 }}>
-        {/* Sidebar */}
-        <aside
-          style={{
-            width: 200,
-            background: '#f8fafc',
-            borderRadius: 8,
-            padding: 16,
-          }}
-        >
-          <p style={{ margin: '0 0 8px', fontWeight: 600, fontSize: 13 }}>
-            Navigation
-          </p>
-          <nav style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-            <Link to="/" style={{ fontSize: 13, color: '#0369a1', textDecoration: 'none', padding: '4px 8px' }}>
-              🏠 Home
-            </Link>
-            <Link to="/settings" style={{ fontSize: 13, color: '#0369a1', textDecoration: 'none', padding: '4px 8px' }}>
-              ⚙ Settings
-            </Link>
-            {/* Plugin routes */}
-            {Array.from(pluginRoutes.values()).filter(r => r.label).map((route) => (
-              <Link key={route.path} to={route.path} style={{ fontSize: 13, color: '#0369a1', textDecoration: 'none', padding: '4px 8px' }}>
-                {route.label}
-              </Link>
-            ))}
-          </nav>
-          <hr style={{ margin: '12px 0', border: 'none', borderTop: '1px solid #e2e8f0' }} />
-          <p style={{ margin: '0 0 8px', fontWeight: 600, fontSize: 13 }}>
-            Sidebar Plugins
-          </p>
-          {layout.sidebar.length === 0 ? (
-            <p style={{ fontSize: 12, color: '#94a3b8' }}>No sidebar plugins.</p>
-          ) : (
-            layout.sidebar
-          )}
-        </aside>
-
-        {/* Main content */}
-        <main style={{ flex: 1 }}>
-          <h2 style={{ marginTop: 0 }}>Dashboard</h2>
-          <div style={{ display: 'grid', gap: 16, gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))' }}>
-            {layout.dashboard.length === 0 ? (
-              <p style={{ color: '#94a3b8' }}>No dashboard plugins loaded.</p>
-            ) : (
-              layout.dashboard
-            )}
-          </div>
-
-          <PluginDebugPanel host={host} />
-        </main>
-      </div>
-    </div>
+      <PluginDebugPanel host={host} />
+    </PageLayout>
   );
 }
 
@@ -324,77 +317,139 @@ function PluginDebugPanel({
 }
 
 // ---------------------------------------------------------------------------
+// ThemeSelector – dropdown to select active theme plugin
+// ---------------------------------------------------------------------------
+
+function ThemeSelector({ host }: { host: PluginHost<AppContext> }) {
+  const manager = host.getManager();
+  const registry = host.getRegistry();
+  const [currentTheme, setCurrentTheme] = useState(() => host.getThemePlugin());
+  
+  // Subscribe to host changes (theme changes trigger re-render)
+  useEffect(() => {
+    const unsubscribe = host.subscribe(() => {
+      setCurrentTheme(host.getThemePlugin());
+    });
+    return unsubscribe;
+  }, [host]);
+  
+  // Get all plugins (enabled + static) that have onThemeEnable (theme plugins)
+  // Static plugins don't need to be "enabled" to be used as themes
+  const themePlugins = registry
+    .getAll()
+    .map(entry => entry.module)
+    .filter(plugin => typeof plugin.onThemeEnable === 'function');
+
+  const handleThemeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const selectedId = e.target.value;
+    
+    // Save theme preference to localStorage
+    localStorage.setItem('react-pkl:active-theme', selectedId);
+    
+    if (selectedId === 'default') {
+      host.setThemePlugin(null);
+    } else {
+      const plugin = themePlugins.find(p => p.meta.id === selectedId);
+      if (plugin) {
+        host.setThemePlugin(plugin);
+      }
+    }
+  };
+
+  return (
+    <section
+      style={{
+        padding: 16,
+        background: 'var(--card-bg, #f8fafc)',
+        borderRadius: 8,
+        border: '1px solid var(--border-color, #e2e8f0)',
+      }}
+    >
+      <h3 style={{ marginTop: 0, fontSize: 16, color: 'var(--text-primary, inherit)' }}>
+        🎨 Theme
+      </h3>
+      <p style={{ color: 'var(--text-secondary, #64748b)', fontSize: 14, marginBottom: 12 }}>
+        Select a theme to customize the appearance of the application
+      </p>
+      
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+        <label
+          htmlFor="theme-select"
+          style={{
+            fontSize: 14,
+            fontWeight: 500,
+            color: 'var(--text-primary, inherit)',
+          }}
+        >
+          Active Theme:
+        </label>
+        <select
+          id="theme-select"
+          value={currentTheme?.meta.id || 'default'}
+          onChange={handleThemeChange}
+          style={{
+            padding: '8px 12px',
+            borderRadius: 6,
+            border: '1px solid var(--border-color, #cbd5e1)',
+            background: 'var(--bg-primary, white)',
+            color: 'var(--text-primary, inherit)',
+            fontSize: 14,
+            cursor: 'pointer',
+            minWidth: 200,
+          }}
+        >
+          <option value="default">Default (Light)</option>
+          {themePlugins.map(plugin => (
+            <option key={plugin.meta.id} value={plugin.meta.id}>
+              {plugin.meta.name}
+            </option>
+          ))}
+        </select>
+      </div>
+      
+      {themePlugins.length === 0 && (
+        <p style={{ color: 'var(--text-muted, #94a3b8)', fontSize: 13, marginTop: 12, marginBottom: 0 }}>
+          No theme plugins available. Enable a theme plugin to customize the appearance.
+        </p>
+      )}
+      
+      {currentTheme && (
+        <p style={{ color: 'var(--text-secondary, #64748b)', fontSize: 13, marginTop: 12, marginBottom: 0 }}>
+          <strong>{currentTheme.meta.name}</strong> - {currentTheme.meta.description}
+        </p>
+      )}
+    </section>
+  );
+}
+
+// ---------------------------------------------------------------------------
 // ---------------------------------------------------------------------------
 // SettingsPage – accessible via /settings route
 // ---------------------------------------------------------------------------
 
-function SettingsPage({ pluginRoutes }: { pluginRoutes: Map<string, PluginRoute> }) {
+function SettingsPage({ host, pluginRoutes }: { host: PluginHost<AppContext>; pluginRoutes: Map<string, PluginRoute> }) {
   const layout = useAppLayout();
 
   return (
-    <div style={{ fontFamily: 'system-ui, sans-serif', padding: 24 }}>
-      {/* Toolbar */}
-      <header
-        style={{
-          display: 'flex',
-          gap: 8,
-          alignItems: 'center',
-          padding: '8px 16px',
-          background: '#f1f5f9',
-          borderRadius: 8,
-          marginBottom: 24,
-        }}
-      >
-        <strong style={{ marginRight: 'auto' }}>My App - Settings</strong>
-        {/* Render toolbar components from layout */}
-        {layout.toolbar}
-      </header>
+    <PageLayout host={host} pluginRoutes={pluginRoutes} currentPath="/settings">
+      <h2 style={{ marginTop: 0, color: 'var(--text-primary, inherit)' }}>Application Settings</h2>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+        {/* Theme Selection */}
+        <ThemeSelector host={host} />
 
-      <div style={{ display: 'flex', gap: 24 }}>
-        <aside
-          style={{
-            width: 200,
-            background: '#f8fafc',
-            borderRadius: 8,
-            padding: 16,
-          }}
-        >
-          <p style={{ margin: '0 0 8px', fontWeight: 600, fontSize: 13 }}>
-            Navigation
-          </p>
-          <nav style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-            <Link to="/" style={{ fontSize: 13, color: '#0369a1', textDecoration: 'none', padding: '4px 8px' }}>
-              🏠 Home
-            </Link>
-            <Link to="/settings" style={{ fontSize: 13, color: '#0369a1', textDecoration: 'none', padding: '4px 8px', fontWeight: 600 }}>
-              ⚙ Settings
-            </Link>
-            {/* Plugin routes */}
-            {Array.from(pluginRoutes.values()).filter(r => r.label).map((route) => (
-              <Link key={route.path} to={route.path} style={{ fontSize: 13, color: '#0369a1', textDecoration: 'none', padding: '4px 8px' }}>
-                {route.label}
-              </Link>
-            ))}
-          </nav>
-        </aside>
+        <section style={{ padding: 16, background: 'var(--card-bg, #f8fafc)', borderRadius: 8 }}>
+          <h3 style={{ marginTop: 0, fontSize: 16, color: 'var(--text-primary, inherit)' }}>General</h3>
+          <p style={{ color: 'var(--text-secondary, #64748b)', fontSize: 14 }}>Basic application settings</p>
+        </section>
 
-        <main style={{ flex: 1 }}>
-          <h2 style={{ marginTop: 0 }}>Application Settings</h2>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-            <section style={{ padding: 16, background: '#f8fafc', borderRadius: 8 }}>
-              <h3 style={{ marginTop: 0, fontSize: 16 }}>General</h3>
-              <p style={{ color: '#64748b', fontSize: 14 }}>Basic application settings</p>
-            </section>
-
-            {/* Plugin settings sections */}
-            {layout.settings.length === 0 ? (
-              <p style={{ color: '#94a3b8', fontSize: 14 }}>No plugin settings available.</p>
-            ) : (
-              layout.settings
-            )}
-          </div>
-        </main>
+        {/* Plugin settings sections */}
+        {layout.settings.length === 0 ? (
+          <p style={{ color: 'var(--text-muted, #94a3b8)', fontSize: 14 }}>No plugin settings available.</p>
+        ) : (
+          layout.settings
+        )}
       </div>
-    </div>
+    </PageLayout>
   );
 }
+

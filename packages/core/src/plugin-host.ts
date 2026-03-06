@@ -12,6 +12,7 @@ export class PluginHost<TContext = unknown> {
   private readonly _manager: PluginManager<TContext>;
   private _themePlugin: PluginModule<TContext> | null = null;
   private _layoutSlots = new Map<Function, Function>();
+  private _themeCleanup: (() => void) | null = null;
   private _resources = new Map<PluginModule<TContext>, Array<() => void>>();
   private _currentPlugin: PluginModule<TContext> | null = null;
   private _changeListeners = new Set<() => void>();
@@ -29,23 +30,37 @@ export class PluginHost<TContext = unknown> {
    * Only one theme plugin can be active at a time.
    * 
    * @param plugin - The plugin module to set as theme, or null to reset to default
-   * @throws Error if plugin doesn't have a layout function
+   * @throws Error if plugin doesn't have onThemeEnable method
    */
   setThemePlugin(plugin: PluginModule<TContext> | null): void {
-    if (plugin && !plugin.layout) {
+    if (plugin && !plugin.onThemeEnable) {
       throw new Error(
-        `Plugin "${plugin.meta.name}" cannot be set as theme plugin: missing layout function`
+        `Plugin "${plugin.meta.name}" cannot be set as theme plugin: missing onThemeEnable method`
       );
     }
 
-    // Clear previous theme
+    // Disable previous theme
+    if (this._themePlugin) {
+      // Call theme cleanup if exists
+      if (this._themeCleanup) {
+        this._themeCleanup();
+        this._themeCleanup = null;
+      }
+      // Call onThemeDisable if exists
+      this._themePlugin.onThemeDisable?.();
+    }
+
+    // Clear previous theme state
     this._layoutSlots.clear();
     this._themePlugin = null;
 
-    // Apply new theme
-    if (plugin?.layout) {
+    // Enable new theme
+    if (plugin?.onThemeEnable) {
       this._themePlugin = plugin;
-      plugin.layout(this._layoutSlots);
+      const cleanup = plugin.onThemeEnable(this._layoutSlots);
+      if (typeof cleanup === 'function') {
+        this._themeCleanup = cleanup;
+      }
     }
 
     // Notify listeners to trigger re-render

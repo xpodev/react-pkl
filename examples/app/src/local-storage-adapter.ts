@@ -4,6 +4,7 @@ import {
   userGreetingPlugin,
   settingsShortcutPlugin,
   customPagePlugin,
+  darkThemePlugin,
 } from 'example-plugins';
 
 /**
@@ -19,6 +20,7 @@ export class LocalStoragePluginProvider implements PluginProvider {
     { id: 'example.user-greeting', loader: () => userGreetingPlugin, defaultEnabled: true },
     { id: 'example.settings-shortcut', loader: () => settingsShortcutPlugin, defaultEnabled: true },
     { id: 'example.custom-page', loader: () => customPagePlugin, defaultEnabled: true },
+    { id: 'example.dark-theme', loader: () => darkThemePlugin, defaultEnabled: false },
   ];
 
   constructor(storageKey = 'react-pkl:plugin-states') {

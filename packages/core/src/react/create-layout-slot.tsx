@@ -36,7 +36,8 @@ export function createLayoutSlot<TProps = {}>(
 ): ComponentType<TProps> {
   function LayoutSlot(props: TProps) {
     const host = usePluginHost();
-    const OverrideComponent = host.getLayoutSlotOverride(DefaultComponent);
+    // Use LayoutSlot itself as the key for lookups, not DefaultComponent
+    const OverrideComponent = host.getLayoutSlotOverride(LayoutSlot);
     
     const Component = (OverrideComponent as ComponentType<TProps>) || DefaultComponent;
     
