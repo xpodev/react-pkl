@@ -9,10 +9,24 @@
   ],
   "scripts": {
     "build": "npm run build --workspaces --if-present",
+    "build:core": "npm run build -w packages/core",
+    "build:sdk": "npm run build -w packages/sdk",
+    "build:packages": "npm run build:core && npm run build:sdk",
+    "build:example-sdk": "npm run build -w examples/sdk",
+    "build:plugins": "npm run build -w examples/plugins",
+    "build:examples": "npm run build:example-sdk && npm run build:plugins",
+    "build:app": "npm run build -w examples/app",
+    "build:all": "npm run build:packages && npm run build:examples && npm run build:app",
     "dev": "npm run dev --workspaces --if-present",
+    "dev:app": "npm run dev -w examples/app",
+    "dev:core": "npm run dev -w packages/core",
+    "dev:sdk": "npm run dev -w packages/sdk",
+    "dev:example-sdk": "npm run dev -w examples/sdk",
+    "dev:plugins": "npm run dev -w examples/plugins",
     "lint": "npm run lint --workspaces --if-present",
     "test": "npm run test --workspaces --if-present",
-    "clean": "npm run clean --workspaces --if-present"
+    "clean": "npm run clean --workspaces --if-present",
+    "clean:all": "npm run clean && cd examples/app && npm run clean"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
