@@ -1,6 +1,5 @@
-import { definePlugin, ToolbarItem, AppHeader, AppSidebar, AppDashboard, StyleProvider } from 'example-sdk';
+import { definePlugin, ToolbarItem, AppHeader, AppSidebar, AppDashboard, StyleProvider, useAppLayout } from 'example-sdk';
 import { useAppContext } from 'example-sdk/react';
-import type { PluginRoute } from 'example-sdk';
 
 /**
  * DarkThemePlugin
@@ -64,7 +63,9 @@ export default darkThemePlugin;
 /**
  * Dark-themed Header component
  */
-function DarkHeader({ toolbar }: { toolbar: React.ReactNode[] }) {
+function DarkHeader() {
+  const layout = useAppLayout();
+  
   return (
     <StyleProvider
       variables={{
@@ -91,7 +92,7 @@ function DarkHeader({ toolbar }: { toolbar: React.ReactNode[] }) {
         <strong style={{ marginRight: 'auto', color: '#e4e4e7', fontSize: 16 }}>
           🌙 My App
         </strong>
-        {toolbar}
+        {layout.toolbar}
       </header>
     </StyleProvider>
   );
@@ -100,15 +101,16 @@ function DarkHeader({ toolbar }: { toolbar: React.ReactNode[] }) {
 /**
  * Dark-themed Sidebar component
  */
-function DarkSidebar({
-  pluginRoutes,
-  sidebarItems,
-  Link,
-}: {
-  pluginRoutes: Map<string, PluginRoute>;
-  sidebarItems: React.ReactNode[];
-  Link: any;
-}) {
+function DarkSidebar() {
+  const context = useAppContext();
+  const layout = useAppLayout();
+  const pluginRoutes = context.router.getRoutes();
+
+  const handleNavigate = (path: string) => (e: React.MouseEvent) => {
+    e.preventDefault();
+    context.router.navigate(path);
+  };
+
   return (
     <StyleProvider
       variables={{
@@ -145,8 +147,9 @@ function DarkSidebar({
         Navigation
       </p>
       <nav style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-        <Link
-          to="/"
+        <a
+          href="/"
+          onClick={handleNavigate('/')}
           style={{
             fontSize: 13,
             color: '#60a5fa',
@@ -154,6 +157,7 @@ function DarkSidebar({
             padding: '6px 12px',
             borderRadius: 4,
             transition: 'background 0.2s',
+            cursor: 'pointer',
           }}
           onMouseEnter={(e: any) => {
             e.currentTarget.style.background = '#3f3f46';
@@ -163,9 +167,10 @@ function DarkSidebar({
           }}
         >
           🏠 Home
-        </Link>
-        <Link
-          to="/settings"
+        </a>
+        <a
+          href="/settings"
+          onClick={handleNavigate('/settings')}
           style={{
             fontSize: 13,
             color: '#60a5fa',
@@ -173,6 +178,7 @@ function DarkSidebar({
             padding: '6px 12px',
             borderRadius: 4,
             transition: 'background 0.2s',
+            cursor: 'pointer',
           }}
           onMouseEnter={(e: any) => {
             e.currentTarget.style.background = '#3f3f46';
@@ -182,14 +188,15 @@ function DarkSidebar({
           }}
         >
           ⚙ Settings
-        </Link>
+        </a>
         {/* Plugin routes */}
         {Array.from(pluginRoutes.values())
           .filter((r) => r.label)
           .map((route) => (
-            <Link
+            <a
               key={route.path}
-              to={route.path}
+              href={route.path}
+              onClick={handleNavigate(route.path)}
               style={{
                 fontSize: 13,
                 color: '#60a5fa',
@@ -197,6 +204,7 @@ function DarkSidebar({
                 padding: '6px 12px',
                 borderRadius: 4,
                 transition: 'background 0.2s',
+                cursor: 'pointer',
               }}
               onMouseEnter={(e: any) => {
                 e.currentTarget.style.background = '#3f3f46';
@@ -206,7 +214,7 @@ function DarkSidebar({
               }}
             >
               {route.label}
-            </Link>
+            </a>
           ))}
       </nav>
       <hr
@@ -228,10 +236,10 @@ function DarkSidebar({
       >
         Sidebar Plugins
       </p>
-      {sidebarItems.length === 0 ? (
+      {layout.sidebar.length === 0 ? (
         <p style={{ fontSize: 12, color: '#71717a' }}>No sidebar plugins.</p>
       ) : (
-        sidebarItems
+        layout.sidebar
       )}
     </aside>
     </StyleProvider>
@@ -241,7 +249,9 @@ function DarkSidebar({
 /**
  * Dark-themed Dashboard component
  */
-function DarkDashboard({ dashboardItems }: { dashboardItems: React.ReactNode[] }) {
+function DarkDashboard() {
+  const layout = useAppLayout();
+  
   return (
     <StyleProvider
       variables={{
@@ -261,7 +271,7 @@ function DarkDashboard({ dashboardItems }: { dashboardItems: React.ReactNode[] }
           gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))',
         }}
       >
-      {dashboardItems.length === 0 ? (
+      {layout.dashboard.length === 0 ? (
         <div
           style={{
             padding: 32,
@@ -278,7 +288,7 @@ function DarkDashboard({ dashboardItems }: { dashboardItems: React.ReactNode[] }
           </p>
         </div>
       ) : (
-        dashboardItems
+        layout.dashboard
       )}
     </div>
     </StyleProvider>

@@ -16,8 +16,11 @@ export function SettingsPage({ host }: { host: PluginHost<AppContext> }) {
   return (
     <PageLayout host={host} currentPath="/settings">
       <h2 style={{ marginTop: 0, color: 'var(--text-primary, inherit)' }}>Application Settings</h2>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>\n        {/* Theme Selection */}\n        <ThemeSelector host={host} />
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
 
+        {/* Theme Selection */}
+        <ThemeSelector host={host} />
+        
         <section style={{ padding: 16, background: 'var(--card-bg, #f8fafc)', borderRadius: 8 }}>
           <h3 style={{ marginTop: 0, fontSize: 16, color: 'var(--text-primary, inherit)' }}>General</h3>
           <p style={{ color: 'var(--text-secondary, #64748b)', fontSize: 14 }}>Basic application settings</p>
