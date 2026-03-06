@@ -120,6 +120,7 @@ onThemeEnable(slots) {
   slots.set(AppSidebar, CustomSidebar);
 }
 
+{% raw %}
 function CustomHeader({ toolbar }) {
   return (
     <header style={{ background: 'linear-gradient(...)' }}>
@@ -127,6 +128,7 @@ function CustomHeader({ toolbar }) {
     </header>
   );
 }
+{% endraw %}
 ```
 
 ## Style Context
@@ -140,6 +142,7 @@ Wrap components to provide style variables:
 ```tsx
 import { StyleProvider } from 'my-sdk';
 
+{% raw %}
 function DarkHeader({ toolbar }) {
   return (
     <StyleProvider
@@ -154,6 +157,7 @@ function DarkHeader({ toolbar }) {
     </StyleProvider>
   );
 }
+{% endraw %}
 ```
 
 ### useStyles Hook
@@ -163,6 +167,7 @@ Access style variables in components:
 ```tsx
 import { useStyles } from 'my-sdk';
 
+{% raw %}
 function MyComponent() {
   const styles = useStyles();
   
@@ -176,6 +181,7 @@ function MyComponent() {
     </div>
   );
 }
+{% endraw %}
 ```
 
 ### Default Style Variables
@@ -339,6 +345,7 @@ const darkThemePlugin = definePlugin({
   ),
 });
 
+{% raw %}
 function DarkHeader({ toolbar }: { toolbar: React.ReactNode[] }) {
   return (
     <StyleProvider
@@ -409,6 +416,7 @@ function DarkDashboard({ dashboardItems }) {
     </StyleProvider>
   );
 }
+{% endraw %}
 
 export default darkThemePlugin;
 ```
