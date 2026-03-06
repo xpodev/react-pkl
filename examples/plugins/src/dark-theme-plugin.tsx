@@ -1,5 +1,5 @@
 import { definePlugin, ToolbarItem, AppHeader, AppSidebar, AppDashboard, StyleProvider, useAppLayout } from 'example-sdk';
-import { useAppContext } from 'example-sdk/react';
+import { useRouter } from 'example-sdk/react';
 
 /**
  * DarkThemePlugin
@@ -102,13 +102,12 @@ function DarkHeader() {
  * Dark-themed Sidebar component
  */
 function DarkSidebar() {
-  const context = useAppContext();
+  const router = useRouter();
   const layout = useAppLayout();
-  const pluginRoutes = context.router.getRoutes();
 
   const handleNavigate = (path: string) => (e: React.MouseEvent) => {
     e.preventDefault();
-    context.router.navigate(path);
+    router.navigate(path);
   };
 
   return (
@@ -189,33 +188,6 @@ function DarkSidebar() {
         >
           ⚙ Settings
         </a>
-        {/* Plugin routes */}
-        {Array.from(pluginRoutes.values())
-          .filter((r) => r.label)
-          .map((route) => (
-            <a
-              key={route.path}
-              href={route.path}
-              onClick={handleNavigate(route.path)}
-              style={{
-                fontSize: 13,
-                color: '#60a5fa',
-                textDecoration: 'none',
-                padding: '6px 12px',
-                borderRadius: 4,
-                transition: 'background 0.2s',
-                cursor: 'pointer',
-              }}
-              onMouseEnter={(e: any) => {
-                e.currentTarget.style.background = '#3f3f46';
-              }}
-              onMouseLeave={(e: any) => {
-                e.currentTarget.style.background = 'transparent';
-              }}
-            >
-              {route.label}
-            </a>
-          ))}
       </nav>
       <hr
         style={{

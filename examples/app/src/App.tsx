@@ -1,5 +1,5 @@
-import { useEffect, useState, useRef } from 'react';
-import { BrowserRouter, Routes, Route, useNavigate, Link } from 'react-router-dom';
+import { useEffect, useState, useRef, useMemo } from 'react';
+import { BrowserRouter, Routes, Route, useNavigate, useLocation, Link } from 'react-router-dom';
 import { 
   createAppHost, 
   AppLayoutProvider,
@@ -8,13 +8,22 @@ import {
   DashboardSlotProvider,
   SettingsSlotProvider,
 } from 'example-sdk';
-import { AppPluginProvider, PluginEntrypoints } from 'example-sdk/react';
-import { createMockAppContext } from './mock-context.js';
+import { 
+  AppPluginProvider, 
+  PluginEntrypoints,
+  NotificationsProvider,
+  RouterProvider,
+  UserProvider,
+  LoggerProvider,
+} from 'example-sdk/react';
+import { createNotificationService, type Notification } from './services/notifications.js';
+import { createRouterService } from './services/router.js';
+import { createLoggerService } from './services/logger.js';
 import { LocalStoragePluginProvider } from './local-storage-adapter.js';
 import { Shell } from './pages/Shell.js';
 import { SettingsPage } from './pages/SettingsPage.js';
 import type { PluginHost } from '@react-pkl/core';
-import type { AppContext, PluginRoute } from 'example-sdk';
+import type { UserInfo } from 'example-sdk';
 
 // ---------------------------------------------------------------------------
 // App – wraps everything in BrowserRouter
@@ -34,47 +43,45 @@ export function App() {
 
 function AppWithRouter() {
   const navigate = useNavigate();
+  const location = useLocation();
   
   // Application state
-  const [notifications, setNotifications] = useState<Array<{ id: string; message: string; type: string }>>([]);
-  const [pluginRoutes] = useState(() => new Map<string, PluginRoute>());
-  const [routeVersion, setRouteVersion] = useState(0);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [user] = useState<UserInfo>({
+    id: 'user-1',
+    name: 'Alice Dev',
+    email: 'alice@example.com',
+    role: 'admin',
+  });
   
-  // Plugin host and context - created once following proper initialization flow
+  // Create services
+  const notificationService = useMemo(
+    () => createNotificationService(setNotifications),
+    []
+  );
+  
+  const routerService = useMemo(
+    () => createRouterService(
+      (path) => navigate(path),
+      () => location.pathname
+    ),
+    [navigate, location.pathname]
+  );
+  
+  const loggerService = useMemo(() => createLoggerService(), []);
+  
+  // Plugin host and provider - created once
   const [state] = useState(() => {
     // Step 1: Create the plugin provider
     const provider = new LocalStoragePluginProvider();
     
-    // Step 2: Create a placeholder context (will add pluginHost after)
-    const appContext = createMockAppContext(
-      null as any, // Placeholder for pluginHost
-      // onNotify
-      (id, message, type) => {
-        setNotifications((prev) => [...prev, { id, message, type }]);
-        setTimeout(() => {
-          setNotifications((prev) => prev.filter((n) => n.id !== id));
-        }, 3000);
-      },
-      // onNavigate
-      (path) => {
-        navigate(path);
-      },
-      // routes
-      pluginRoutes,
-      // onRouteChange
-      () => setRouteVersion((v) => v + 1)
-    );
-
-    // Step 3: Create the plugin host with context
-    const pluginHost = createAppHost(appContext);
+    // Step 2: Create the plugin host (no context needed in v0.3.0)
+    const pluginHost = createAppHost();
     
-    // Step 4: Now set the pluginHost reference in the context
-    appContext.pluginHost = pluginHost;
-    
-    return { provider, host: pluginHost, context: appContext };
+    return { provider, host: pluginHost };
   });
   
-  const { provider, host, context } = state;
+  const { provider, host } = state;
   
   // Get the plugin registry and manager from the host
   const registry = host.getRegistry();
@@ -103,19 +110,19 @@ function AppWithRouter() {
     loadingStarted.current = true;
 
     async function loadPlugins() {
-      // Step 4: Get plugins from provider and load them
+      // Step 3: Get plugins from provider and load them
       const plugins = provider.getPlugins();
       for (const plugin of plugins) {
         await manager.add(plugin.loader, { enabled: plugin.enabled });
       }
       
-      // Step 5: Restore saved theme from localStorage
+      // Step 4: Restore saved theme from localStorage
       const savedThemeId = localStorage.getItem('react-pkl:active-theme');
       if (savedThemeId && savedThemeId !== 'default') {
         // Find the theme plugin
-        const allPlugins = registry.getAll().map(e => e.module);
+        const allPlugins = registry.getAll().map((e: any) => e.module);
         const themePlugin = allPlugins.find(
-          p => p.meta.id === savedThemeId && typeof p.onThemeEnable === 'function'
+          (p: any) => p.meta.id === savedThemeId && typeof p.onThemeEnable === 'function'
         );
         if (themePlugin) {
           host.setThemePlugin(themePlugin);
@@ -130,52 +137,56 @@ function AppWithRouter() {
   if (!ready) return <p>Loading plugins…</p>;
 
   return (
-    <AppLayoutProvider initialLayout={{ toolbar: [], sidebar: [], dashboard: [], settings: [] }}>
-      <AppPluginProvider host={host} context={context}>
-        {/* Slot providers wrap the entire app */}
-        <ToolbarSlotProvider>
-          <SidebarSlotProvider>
-            <DashboardSlotProvider>
-              <SettingsSlotProvider>
-                {/* Render plugin entrypoints - they register with slot providers */}
-                <PluginEntrypoints />
-                
-                {/* Toast notifications */}
-                <div style={{ position: 'fixed', top: 16, right: 16, zIndex: 1000, display: 'flex', flexDirection: 'column', gap: 8 }}>
-                  {notifications.map((notif) => (
-                    <div
-                      key={notif.id}
-                      style={{
-                        padding: '12px 16px',
-                        borderRadius: 8,
-                        background: notif.type === 'error' ? '#fee' : notif.type === 'success' ? '#efe' : notif.type === 'warning' ? '#ffe' : '#e0f2fe',
-                        color: notif.type === 'error' ? '#c00' : notif.type === 'success' ? '#090' : notif.type === 'warning' ? '#880' : '#0369a1',
-                        boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-                        fontSize: 14,
-                      }}
-                    >
-                      {notif.message}
-                    </div>
-                  ))}
-                </div>
+    <NotificationsProvider value={notificationService}>
+      <RouterProvider value={routerService}>
+        <UserProvider value={user}>
+          <LoggerProvider value={loggerService}>
+            <AppLayoutProvider initialLayout={{ toolbar: [], sidebar: [], dashboard: [], settings: [] }}>
+              <AppPluginProvider host={host}>
+                {/* Slot providers wrap the entire app */}
+                <ToolbarSlotProvider>
+                  <SidebarSlotProvider>
+                    <DashboardSlotProvider>
+                      <SettingsSlotProvider>
+                        {/* Render plugin entrypoints - they register with slot providers */}
+                        <PluginEntrypoints />
+                        
+                        {/* Toast notifications */}
+                        <div style={{ position: 'fixed', top: 16, right: 16, zIndex: 1000, display: 'flex', flexDirection: 'column', gap: 8 }}>
+                          {notifications.map((notif) => (
+                            <div
+                              key={notif.id}
+                              style={{
+                                padding: '12px 16px',
+                                        borderRadius: 8,
+                                background: notif.type === 'error' ? '#fee' : notif.type === 'success' ? '#efe' : notif.type === 'warning' ? '#ffe' : '#e0f2fe',
+                                color: notif.type === 'error' ? '#c00' : notif.type === 'success' ? '#090' : notif.type === 'warning' ? '#880' : '#0369a1',
+                                boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                                fontSize: 14,
+                              }}
+                            >
+                              {notif.message}
+                            </div>
+                          ))}
+                        </div>
 
-                {/* Routes */}
-                <Routes key={routeVersion}>
-                  <Route path="/" element={<Shell host={host} />} />
-                  <Route path="/settings" element={<SettingsPage host={host} />} />
-                  {/* Dynamic plugin routes */}
-                  {Array.from(pluginRoutes.values()).map((route) => (
-                    <Route key={route.path} path={route.path} element={<route.component />} />
-                  ))}
-                  {/* 404 page */}
-                  <Route path="*" element={<NotFoundPage />} />
-                </Routes>
-              </SettingsSlotProvider>
-            </DashboardSlotProvider>
-          </SidebarSlotProvider>
-        </ToolbarSlotProvider>
-      </AppPluginProvider>
-    </AppLayoutProvider>
+                        {/* Routes */}
+                        <Routes>
+                          <Route path="/" element={<Shell host={host} />} />
+                          <Route path="/settings" element={<SettingsPage host={host} />} />
+                          {/* 404 page */}
+                          <Route path="*" element={<NotFoundPage />} />
+                        </Routes>
+                      </SettingsSlotProvider>
+                    </DashboardSlotProvider>
+                  </SidebarSlotProvider>
+                </ToolbarSlotProvider>
+              </AppPluginProvider>
+            </AppLayoutProvider>
+          </LoggerProvider>
+        </UserProvider>
+      </RouterProvider>
+    </NotificationsProvider>
   );
 }
 

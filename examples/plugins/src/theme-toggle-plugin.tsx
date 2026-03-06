@@ -1,14 +1,14 @@
 import { definePlugin, ToolbarItem } from 'example-sdk';
-import { useAppContext } from 'example-sdk/react';
+import { useNotifications, useRouter } from 'example-sdk/react';
 import { useCallback } from 'react';
 
 /**
  * SettingsShortcutPlugin
  *
  * Demonstrates:
- * - Registering / cleaning up a global keyboard shortcut in activate/deactivate.
- * - Using `context.router` inside a toolbar component via `useAppContext()`.
- * - Using `context.notifications` to give feedback on actions.
+ * - Registering / cleaning up a global keyboard shortcut in activate/deactivate
+ * - Using service hooks (`useRouter`, `useNotifications`) in components
+ * - Resource cleanup on plugin disable
  */
 export default definePlugin({
   meta: {
@@ -19,29 +19,23 @@ export default definePlugin({
       'Adds a toolbar button and a keyboard shortcut (Alt+,) to open Settings.',
   },
 
-  activate(context) {
-    context.logger.log('[SettingsShortcutPlugin] registering Alt+, shortcut');
+  activate(infra) {
+    console.log('[SettingsShortcutPlugin] registering Alt+, shortcut');
 
     const handler = (e: KeyboardEvent) => {
       if (e.altKey && e.key === ',') {
         e.preventDefault();
-        context.router.navigate('/settings');
-        context.notifications.show('Opened Settings (Alt+,)', 'info');
+        // Navigate directly without notification (can't use React hooks here)
+        window.location.hash = '#/settings';
       }
     };
 
     window.addEventListener('keydown', handler);
 
-    // Store the handler so deactivate can remove it.
-    // Using a module-level ref is intentional here – plugins are singletons.
-    _keydownHandler = handler;
-  },
-
-  deactivate() {
-    if (_keydownHandler) {
-      window.removeEventListener('keydown', _keydownHandler);
-      _keydownHandler = null;
-    }
+    // Register cleanup with resource tracker
+    infra._resources.register(infra._pluginId, () => {
+      window.removeEventListener('keydown', handler);
+    });
   },
 
   entrypoint: () => (
@@ -51,15 +45,13 @@ export default definePlugin({
   ),
 });
 
-// Module-level handle for the keyboard listener (plugin is a singleton).
-let _keydownHandler: ((e: KeyboardEvent) => void) | null = null;
-
 // ---------------------------------------------------------------------------
 // Components
 // ---------------------------------------------------------------------------
 
 function SettingsToolbarButton() {
-  const { router, notifications } = useAppContext();
+  const router = useRouter();
+  const notifications = useNotifications();
 
   const handleClick = useCallback(() => {
     router.navigate('/settings');

@@ -4,8 +4,8 @@ import { definePlugin, ToolbarItem } from 'example-sdk';
  * HelloPlugin – the simplest possible app plugin.
  *
  * Demonstrates:
- * - Using `context.logger` and `context.notifications` in `activate`.
- * - Contributing a component to the `toolbar` slot using entrypoint.
+ * - Minimal plugin structure with entrypoint
+ * - Contributing a component to the `toolbar` slot
  */
 export default definePlugin({
   meta: {
@@ -15,13 +15,15 @@ export default definePlugin({
     description: 'A minimal plugin that greets the user when activated.',
   },
 
-  activate(context) {
-    context.logger.log('[HelloPlugin] activated');
-    context.notifications.show('Hello Plugin is active!', 'success');
+  activate(infra) {
+    // Plugin infrastructure is available here (host, _resources, _pluginId)
+    // For React hooks like notifications/logger, use them in components
+    console.log('[HelloPlugin] activated');
   },
 
   deactivate() {
-    // Nothing to clean up, but showing the hook exists.
+    // Nothing to clean up
+    console.log('[HelloPlugin] deactivated');
   },
 
   entrypoint: () => (

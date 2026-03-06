@@ -1,13 +1,13 @@
 import { definePlugin, DashboardItem } from 'example-sdk';
-import { useAppContext } from 'example-sdk/react';
+import { useUser } from 'example-sdk/react';
 
 /**
  * UserGreetingPlugin
  *
  * Demonstrates:
- * - Using `useAppContext()` inside a plugin component to read the host context.
- * - Contributing a widget to the `dashboard` slot using entrypoint.
- * - No activation side-effects needed (just a pure UI extension).
+ * - Using `useUser()` service hook inside a plugin component
+ * - Contributing a widget to the `dashboard` slot using entrypoint
+ * - No activation side-effects needed (just a pure UI extension)
  */
 export default definePlugin({
   meta: {
@@ -29,7 +29,7 @@ export default definePlugin({
 // ---------------------------------------------------------------------------
 
 function UserGreetingWidget() {
-  const { user } = useAppContext();
+  const user = useUser();
 
   if (!user) {
     return (
