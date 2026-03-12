@@ -1,6 +1,6 @@
 {
   "name": "pkl.js",
-  "version": "0.1.0",
+  "version": "0.3.0",
   "description": "Plugin SDK for application developers using React",
   "workspaces": [
     "packages/*",
