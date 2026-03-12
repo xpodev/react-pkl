@@ -106,7 +106,7 @@ export function useSlotComponents(
  * 
  * @example
  * ```typescript
- * import { createTypedHooks } from '@react-pkl/core/react';
+ * import { createTypedHooks } from '@pkl.js/react/react';
  * import type { MyAppContext } from './types';
  * 
  * export const {

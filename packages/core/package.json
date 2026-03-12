@@ -1,7 +1,31 @@
 {
-  "name": "@react-pkl/core",
+  "name": "@pkl.js/react",
   "version": "0.3.0",
   "description": "Typesafe plugin system for React",
+  "author": "Xpo Development <dev@xpo.dev>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/xpodev/react-pkl.git",
+    "directory": "packages/core"
+  },
+  "homepage": "https://xpodev.github.io/react-pkl",
+  "bugs": {
+    "url": "https://github.com/xpodev/react-pkl/issues"
+  },
+  "keywords": [
+    "react",
+    "plugin",
+    "plugin-system",
+    "extensibility",
+    "typescript",
+    "slots",
+    "layout"
+  ],
+  "files": [
+    "dist",
+    "README.md"
+  ],
   "type": "module",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",

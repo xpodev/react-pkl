@@ -1,11 +1,11 @@
-# @react-pkl/sdk
+# @pkl.js/react-sdk
 
 Build tools for creating React PKL plugins.
 
 ## Installation
 
 ```bash
-npm install --save-dev @react-pkl/sdk
+npm install --save-dev @pkl.js/react-sdk
 ```
 
 ## Usage
@@ -13,7 +13,7 @@ npm install --save-dev @react-pkl/sdk
 ### Basic Build
 
 ```typescript
-import { buildPlugin } from '@react-pkl/sdk';
+import { buildPlugin } from '@pkl.js/react-sdk';
 
 await buildPlugin({
   entry: './src/index.tsx',
@@ -129,7 +129,7 @@ interface PluginBuildResult<TMeta = unknown> {
 
 ```javascript
 // build.js
-import { buildPlugin } from '@react-pkl/sdk';
+import { buildPlugin } from '@pkl.js/react-sdk';
 
 await buildPlugin({
   entry: './src/index.tsx',

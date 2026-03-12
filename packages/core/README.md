@@ -1,18 +1,18 @@
-# @react-pkl/core
+# @pkl.js/react
 
 The core plugin management system for React PKL.
 
 ## Installation
 
 ```bash
-npm install @react-pkl/core react
+npm install @pkl.js/react react
 ```
 
 ## Quick Start
 
 ```typescript
-import { PluginManager } from '@react-pkl/core';
-import { PluginProvider, PluginSlot } from '@react-pkl/core/react';
+import { PluginManager } from '@pkl.js/react';
+import { PluginProvider, PluginSlot } from '@pkl.js/react/react';
 
 // Create plugin manager
 const manager = new PluginManager(myAppContext);
@@ -67,7 +67,7 @@ import {
   usePlugins,
   useEnabledPlugins,
   useSlotComponents,
-} from '@react-pkl/core/react';
+} from '@pkl.js/react/react';
 
 // Provider
 <PluginProvider registry={manager.registry}>
@@ -85,7 +85,7 @@ const toolbarComponents = useSlotComponents('toolbar');
 
 ## Exports
 
-### Main Export (`@react-pkl/core`)
+### Main Export (`@pkl.js/react`)
 
 - `PluginManager` - Standalone mode manager
 - `PluginClient` - Client mode manager
@@ -93,7 +93,7 @@ const toolbarComponents = useSlotComponents('toolbar');
 - `ResourceTracker` - Resource cleanup system
 - Types: `PluginModule`, `PluginMeta`, `PluginEntry`, `PluginLoader`, etc.
 
-### React Export (`@react-pkl/core/react`)
+### React Export (`@pkl.js/react/react`)
 
 - `PluginProvider` - React context provider
 - `PluginSlot` - Render plugin components

@@ -1,4 +1,4 @@
-import type { PluginMeta } from '@react-pkl/core';
+import type { PluginMeta } from '@pkl.js/react';
 import type { Format, Plugin as EsbuildPlugin } from 'esbuild';
 
 // ---------------------------------------------------------------------------

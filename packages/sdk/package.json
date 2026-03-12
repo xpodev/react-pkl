@@ -1,7 +1,30 @@
 {
-  "name": "@react-pkl/sdk",
+  "name": "@pkl.js/react-sdk",
   "version": "0.3.0",
   "description": "Build tool for bundling react-pkl plugins",
+  "author": "Xpo Development <dev@xpo.dev>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/xpodev/react-pkl.git",
+    "directory": "packages/sdk"
+  },
+  "homepage": "https://xpodev.github.io/react-pkl",
+  "bugs": {
+    "url": "https://github.com/xpodev/react-pkl/issues"
+  },
+  "keywords": [
+    "react",
+    "plugin",
+    "build-tool",
+    "bundler",
+    "esbuild",
+    "typescript"
+  ],
+  "files": [
+    "dist",
+    "README.md"
+  ],
   "type": "module",
   "bin": {
     "pkl-build": "./dist/cli.js"
@@ -25,7 +48,7 @@
     "esbuild": "^0.21.0"
   },
   "devDependencies": {
-    "@react-pkl/core": "*",
+    "@pkl.js/react": "*",
     "@types/node": "^22.0.0",
     "rimraf": "^5.0.0",
     "tsup": "^8.0.0",
