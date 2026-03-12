@@ -79,7 +79,7 @@ In your SDK:
 
 ```typescript
 // sdk/src/layout-slots.tsx
-import { createLayoutSlot } from '@react-pkl/core/react';
+import { createLayoutSlot } from '@pkl.js/react/react';
 
 export const AppHeader = createLayoutSlot<{ toolbar: React.ReactNode[] }>(
   function DefaultHeader({ toolbar }) {
@@ -278,7 +278,7 @@ const dataPlugin = definePlugin({
 Use helper functions to identify plugin types:
 
 ```typescript
-import { isStaticPlugin, isThemePlugin } from '@react-pkl/core';
+import { isStaticPlugin, isThemePlugin } from '@pkl.js/react';
 
 if (isStaticPlugin(plugin)) {
   // Plugin has no activate/deactivate
@@ -431,8 +431,8 @@ export default darkThemePlugin;
 In your app:
 
 ```tsx
-import { PluginHost } from '@react-pkl/core';
-import { isThemePlugin } from '@react-pkl/core';
+import { PluginHost } from '@pkl.js/react';
+import { isThemePlugin } from '@pkl.js/react';
 import { darkThemePlugin } from 'my-plugins';
 
 // Add the theme plugin

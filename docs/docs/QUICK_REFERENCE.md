@@ -11,10 +11,10 @@ Fast lookup for common tasks and patterns in React PKL.
 
 ```bash
 # Core package
-npm install @react-pkl/core react
+npm install @pkl.js/react react
 
 # SDK build tools (dev dependency)
-npm install --save-dev @react-pkl/sdk
+npm install --save-dev @pkl.js/react-sdk
 ```
 
 ## Basic Setup
@@ -22,7 +22,7 @@ npm install --save-dev @react-pkl/sdk
 ### Create Plugin Manager
 
 ```typescript
-import { PluginManager } from '@react-pkl/core';
+import { PluginManager } from '@pkl.js/react';
 
 const manager = new PluginManager<MyAppContext>(context);
 ```
@@ -51,7 +51,7 @@ await manager.remove('plugin-id');
 ### React Integration
 
 ```tsx
-import { PluginProvider, PluginSlot } from '@react-pkl/core/react';
+import { PluginProvider, PluginSlot } from '@pkl.js/react/react';
 
 <PluginProvider registry={manager.registry}>
   <PluginSlot name="toolbar" />
@@ -103,7 +103,7 @@ import {
   usePlugin,
   usePluginMeta,
   useSlotComponents,
-} from '@react-pkl/core/react';
+} from '@pkl.js/react/react';
 
 // Get all plugins
 const plugins = usePlugins();
@@ -281,7 +281,7 @@ export default definePlugin({
 ### Basic Build
 
 ```typescript
-import { buildPlugin } from '@react-pkl/sdk';
+import { buildPlugin } from '@pkl.js/react-sdk';
 
 await buildPlugin({
   entry: './src/index.tsx',
@@ -313,7 +313,7 @@ await buildPlugin({
 ### Setup Client
 
 ```typescript
-import { PluginClient } from '@react-pkl/core';
+import { PluginClient } from '@pkl.js/react';
 
 const client = new PluginClient({
   manifestUrl: 'https://api.example.com/plugins/manifest.json',
@@ -344,7 +344,7 @@ await client.sync();
 
 ```typescript
 // In your SDK
-import type { PluginModule } from '@react-pkl/core';
+import type { PluginModule } from '@pkl.js/react';
 
 export type MyAppPlugin = PluginModule<MyAppContext>;
 
@@ -447,8 +447,8 @@ describe('MyPlugin', () => {
 
 ```typescript
 import { render } from '@testing-library/react';
-import { PluginProvider, PluginSlot } from '@react-pkl/core/react';
-import { PluginManager } from '@react-pkl/core';
+import { PluginProvider, PluginSlot } from '@pkl.js/react/react';
+import { PluginManager } from '@pkl.js/react';
 
 it('renders plugin', async () => {
   const manager = new PluginManager();
@@ -505,7 +505,7 @@ console.log(manager.resources.has('plugin-id'));
 
 ### Type Errors
 
-1. Import from your SDK, not `@react-pkl/core`
+1. Import from your SDK, not `@pkl.js/react`
 2. Ensure SDK is built
 3. Check `tsconfig.json` settings
 

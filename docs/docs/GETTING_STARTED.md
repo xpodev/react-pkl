@@ -23,10 +23,10 @@ React PKL is a monorepo with multiple packages. For a basic setup, you'll need:
 
 ```bash
 # Install the core package
-npm install @react-pkl/core react
+npm install @pkl.js/react react
 
 # Install the SDK package for building plugins (dev dependency)
-npm install --save-dev @react-pkl/sdk
+npm install --save-dev @pkl.js/react-sdk
 ```
 
 ## Understanding the Architecture
@@ -128,7 +128,7 @@ Create a layout context and slot components using React PKL's utilities:
 
 ```typescript
 // my-app-sdk/src/slots.ts
-import { createLayoutContext, createSlot } from '@react-pkl/core/react';
+import { createLayoutContext, createSlot } from '@pkl.js/react/react';
 import type { AppLayout } from './app-layout.js';
 
 /**
@@ -170,7 +170,7 @@ Layout slots are themeable components that use `useAppLayout()` to get their con
 
 ```typescript
 // my-app-sdk/src/layout-slots.tsx
-import { createLayoutSlot } from '@react-pkl/core/react';
+import { createLayoutSlot } from '@pkl.js/react/react';
 import { useAppLayout } from './slots.js';
 
 /**
@@ -221,8 +221,8 @@ Make it easy for plugin developers to use your SDK:
 
 ```typescript
 // my-app-sdk/src/plugin.ts
-import { PluginHost, PluginInfrastructure } from '@react-pkl/core';
-import type { PluginModule } from '@react-pkl/core';
+import { PluginHost, PluginInfrastructure } from '@pkl.js/react';
+import type { PluginModule } from '@pkl.js/react';
 
 // Type alias for your plugins - uses minimal PluginInfrastructure
 export type AppPlugin = PluginModule<PluginInfrastructure>;
@@ -238,7 +238,7 @@ export function createAppHost() {
 }
 ```
 
-> **What is PluginInfrastructure?** It's a minimal context type exported by `@react-pkl/core` containing only the essential plugin system infrastructure: `host` (PluginHost), `_resources` (ResourceTracker), and `_pluginId` (string). Your app services are provided separately via React context.
+> **What is PluginInfrastructure?** It's a minimal context type exported by `@pkl.js/react` containing only the essential plugin system infrastructure: `host` (PluginHost), `_resources` (ResourceTracker), and `_pluginId` (string). Your app services are provided separately via React context.
 
 ### Step 6: Create React Service Contexts
 
@@ -337,7 +337,7 @@ Create a simple hooks file that uses `createTypedHooks` to generate typed plugin
 
 ```typescript
 // my-app-sdk/src/react/hooks.ts
-import { createTypedHooks, PluginInfrastructure } from '@react-pkl/core/react';
+import { createTypedHooks, PluginInfrastructure } from '@pkl.js/react/react';
 
 // Create typed hooks for PluginInfrastructure
 export const {
@@ -358,7 +358,7 @@ Create a simple re-export of the core PluginProvider:
 
 ```typescript
 // my-app-sdk/src/react/provider.tsx
-export { PluginProvider as AppPluginProvider } from '@react-pkl/core/react';
+export { PluginProvider as AppPluginProvider } from '@pkl.js/react/react';
 ```
 
 > **Simple!** Since we're using the core infrastructure and separate service contexts, we don't need a custom provider wrapper.
@@ -399,7 +399,7 @@ export {
 } from './plugin.js';
 
 // Re-export for convenience
-export type { PluginMeta, PluginInfrastructure } from '@react-pkl/core';
+export type { PluginMeta, PluginInfrastructure } from '@pkl.js/react';
 ```
 
 ```typescript
@@ -435,7 +435,7 @@ export {
 } from './services.js';
 
 // Re-export PluginEntrypoints for rendering plugin UI
-export { PluginEntrypoints } from '@react-pkl/core/react';
+export { PluginEntrypoints } from '@pkl.js/react/react';
 ```
 
 > **Note:** The main `index.ts` exports types, slots, and plugin helpers. The `react/index.ts` exports React-specific hooks, providers, and service contexts. This modular structure allows plugin developers to import exactly what they need.
@@ -460,7 +460,7 @@ export { PluginEntrypoints } from '@react-pkl/core/react';
     }
   },
   "peerDependencies": {
-    "@react-pkl/core": "^0.3.0",
+    "@pkl.js/react": "^0.3.0",
     "react": ">=18.0.0"
   }
 }
@@ -708,7 +708,7 @@ For production, use the SDK build tool:
 
 ```typescript
 // plugins/hello-plugin/build.ts
-import { buildPlugin } from '@react-pkl/sdk';
+import { buildPlugin } from '@pkl.js/react-sdk';
 
 await buildPlugin({
   entry: './src/index.tsx',
@@ -848,7 +848,7 @@ function PluginSettingsPanel() {
 ### Type Errors
 
 1. Ensure your SDK properly exports types
-2. Plugin developers need to import types from your SDK, not `@react-pkl/core`
+2. Plugin developers need to import types from your SDK, not `@pkl.js/react`
 3. Check `tsconfig.json` has proper module resolution
 
 ### Context Not Available

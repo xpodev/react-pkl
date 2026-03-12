@@ -30,7 +30,7 @@ One of React PKL's most powerful features is automatic resource cleanup. When a 
 
 ```typescript
 // my-sdk/src/router-service.ts
-import type { ResourceTracker } from '@react-pkl/core';
+import type { ResourceTracker } from '@pkl.js/react';
 
 export class RouterService {
   private routes = new Map<string, Route>();
@@ -506,8 +506,8 @@ export default router;
 
 ```tsx
 // app/src/App.tsx
-import { PluginClient } from '@react-pkl/core';
-import { PluginProvider } from '@react-pkl/core/react';
+import { PluginClient } from '@pkl.js/react';
+import { PluginProvider } from '@pkl.js/react/react';
 
 function App() {
   const [client] = useState(() => 
@@ -794,8 +794,8 @@ describe('MyPlugin', () => {
 ```tsx
 // integration.test.tsx
 import { render, screen } from '@testing-library/react';
-import { PluginProvider, PluginSlot } from '@react-pkl/core/react';
-import { PluginManager } from '@react-pkl/core';
+import { PluginProvider, PluginSlot } from '@pkl.js/react/react';
+import { PluginManager } from '@pkl.js/react';
 import myPlugin from './my-plugin.js';
 
 describe('Plugin Integration', () => {

@@ -78,8 +78,8 @@ React PKL is a monorepo using npm workspaces:
 ```
 react-pkl/
 ├── packages/
-│   ├── core/           # Main plugin system (@react-pkl/core)
-│   └── sdk/            # Build tools (@react-pkl/sdk)
+│   ├── core/           # Main plugin system (@pkl.js/react)
+│   └── sdk/            # Build tools (@pkl.js/react-sdk)
 ├── examples/
 │   ├── app/            # Example host application
 │   ├── sdk/            # Example custom SDK

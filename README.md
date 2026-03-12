@@ -23,10 +23,10 @@ React PKL provides **primitives** for making React apps extensible through plugi
 
 ```bash
 # Core plugin primitives
-npm install @react-pkl/core
+npm install @pkl.js/react
 
 # Build tools for creating plugins (dev dependency)
-npm install --save-dev @react-pkl/sdk
+npm install --save-dev @pkl.js/react-sdk
 ```
 
 ## 🧩 Core Concepts
@@ -36,7 +36,7 @@ npm install --save-dev @react-pkl/sdk
 Layout slots are components that can be replaced by theme plugins:
 
 ```typescript
-import { createLayoutSlot } from '@react-pkl/core/react';
+import { createLayoutSlot } from '@pkl.js/react/react';
 
 // Define a themeable header
 const AppHeader = createLayoutSlot(() => {
@@ -55,7 +55,7 @@ plugin.onThemeEnable(slots => {
 Item slots let plugins inject content into specific areas:
 
 ```typescript
-import { createLayoutContext, createSlot } from '@react-pkl/core/react';
+import { createLayoutContext, createSlot } from '@pkl.js/react/react';
 
 // 1. Create layout context
 const { LayoutProvider, useLayout, useLayoutController } = createLayoutContext();
@@ -84,7 +84,7 @@ const { Provider: ToolbarProvider, Item: ToolbarItem } = createSlot(
 Manage plugin lifecycle:
 
 ```typescript
-import { PluginHost } from '@react-pkl/core';
+import { PluginHost } from '@pkl.js/react';
 
 // Minimal infrastructure context
 const host = new PluginHost();
@@ -118,7 +118,7 @@ React PKL provides primitives - you decide how to compose them. Here's a minimal
 
 ```typescript
 // 1. Define plugin shape
-import { PluginHost, type PluginModule, type PluginInfrastructure } from '@react-pkl/core';
+import { PluginHost, type PluginModule, type PluginInfrastructure } from '@pkl.js/react';
 
 export interface MyAppPlugin extends PluginModule<PluginInfrastructure> {
   entrypoint?: () => React.ReactNode;
@@ -130,7 +130,7 @@ export function createPluginHost() {
 }
 
 // 3. Define slots (optional - only if you want extensibility points)
-import { createLayoutContext, createSlot } from '@react-pkl/core/react';
+import { createLayoutContext, createSlot } from '@pkl.js/react/react';
 
 interface MyLayout {
   toolbar: React.ReactNode[];
@@ -182,7 +182,7 @@ import {
   PluginMeta,            // Plugin metadata
   PluginEntry,           // Registry entry
   PluginLoader,          // Plugin factory type
-} from '@react-pkl/core';
+} from '@pkl.js/react';
 ```
 
 ### React Exports
@@ -207,13 +207,13 @@ import {
   
   // Components
   PluginEntrypoints,     // Render all plugin entrypoints
-} from '@react-pkl/core/react';
+} from '@pkl.js/react/react';
 ```
 
 ### Build Tools
 
 ```typescript
-import { buildPlugin } from '@react-pkl/sdk';
+import { buildPlugin } from '@pkl.js/react-sdk';
 
 await buildPlugin({
   entry: './src/index.tsx',
@@ -245,14 +245,14 @@ Check the [examples/](examples/) directory for:
 
 ```typescript
 // 1. Create plugin host
-import { PluginHost } from '@react-pkl/core';
+import { PluginHost } from '@pkl.js/react';
 const host = new PluginHost();
 
 // 2. Load plugins
 await host.add(() => import('./my-plugin.js'), { enabled: true });
 
 // 3. Wrap app
-import { PluginProvider } from '@react-pkl/core/react';
+import { PluginProvider } from '@pkl.js/react/react';
 
 <PluginProvider host={host}>
   <App />

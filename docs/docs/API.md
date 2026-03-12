@@ -7,7 +7,7 @@ title: API Reference
 
 Complete API documentation for React PKL v0.2.0.
 
-## Core Package (`@react-pkl/core`)
+## Core Package (`@pkl.js/react`)
 
 ### PluginHost
 
@@ -360,7 +360,7 @@ interface PluginMeta {
 Check if a plugin is "static" (doesn't have lifecycle methods). Static plugins are always available and cannot be enabled/disabled.
 
 ```typescript
-import { isStaticPlugin } from '@react-pkl/core';
+import { isStaticPlugin } from '@pkl.js/react';
 
 if (isStaticPlugin(plugin)) {
   console.log('This is a static plugin');
@@ -372,7 +372,7 @@ if (isStaticPlugin(plugin)) {
 Check if a plugin is a theme plugin (has `onThemeEnable` method).
 
 ```typescript
-import { isThemePlugin } from '@react-pkl/core';
+import { isThemePlugin } from '@pkl.js/react';
 
 if (isThemePlugin(plugin)) {
   host.setThemePlugin(plugin);
@@ -381,7 +381,7 @@ if (isThemePlugin(plugin)) {
 
 ---
 
-## React Integration (`@react-pkl/core/react`)
+## React Integration (`@pkl.js/react/react`)
 
 ### Components
 
@@ -698,7 +698,7 @@ Create a slot component that plugins can register items to.
 **Examples:**
 
 ```typescript
-import { createSlot } from '@react-pkl/core/react';
+import { createSlot } from '@pkl.js/react/react';
 
 // Simple slots (use default children prop)
 export const ToolbarItem = createSlot('toolbar');
@@ -731,7 +731,7 @@ entrypoint() {
 Create a layout slot that theme plugins can override.
 
 ```typescript
-import { createLayoutSlot } from '@react-pkl/core/react';
+import { createLayoutSlot } from '@pkl.js/react/react';
 
 export const AppHeader = createLayoutSlot(() => {
   const { toolbar } = useAppLayout();
@@ -797,7 +797,7 @@ type PluginEventListener = (event: PluginEvent) => void;
 
 ---
 
-## SDK Package (`@react-pkl/sdk`)
+## SDK Package (`@pkl.js/react-sdk`)
 
 Build tools for creating and bundling plugins (not changed in v0.2.0).
 
@@ -819,7 +819,7 @@ interface BuildOptions {
 
 **Example:**
 ```typescript
-import { buildPlugin } from '@react-pkl/sdk';
+import { buildPlugin } from '@pkl.js/react-sdk';
 
 await buildPlugin({
   entryPoint: 'src/plugin.tsx',
@@ -968,7 +968,7 @@ const toolbarComponents = useSlotComponents('toolbar');
 
 ---
 
-## SDK Package (`@react-pkl/sdk`)
+## SDK Package (`@pkl.js/react-sdk`)
 
 ### `buildPlugin(config: PluginBuildConfig): Promise<PluginBuildResult>`
 
@@ -1004,7 +1004,7 @@ interface PluginBuildResult<TMeta = unknown> {
 
 **Example:**
 ```typescript
-import { buildPlugin } from '@react-pkl/sdk';
+import { buildPlugin } from '@pkl.js/react-sdk';
 
 const result = await buildPlugin({
   entry: './src/index.tsx',

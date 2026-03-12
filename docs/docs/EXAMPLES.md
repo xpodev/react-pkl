@@ -458,7 +458,7 @@ export default definePlugin({
 
 ### Type Errors
 
-1. Import types from `example-sdk`, not `@react-pkl/core`
+1. Import types from `example-sdk`, not `@pkl.js/react`
 2. Ensure SDK is built: `cd examples/sdk && npm run build`
 3. Check TypeScript version compatibility
 
