@@ -1,6 +1,6 @@
 {
   "name": "@pkl.js/react-sdk",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "Build tool for bundling react-pkl plugins",
   "author": "Xpo Development <dev@xpo.dev>",
   "license": "MIT",
