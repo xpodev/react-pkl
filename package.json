@@ -1,8 +1,8 @@
 {
-  "name": "react-pkl-monorepo",
-  "private": true,
-  "version": "0.0.0",
-  "description": "Monorepo for react-pkl plugin system",
+  "name": "@pkl.js/react",
+  "private": false,
+  "version": "0.1.0",
+  "description": "Plugin SDK for application developers using React",
   "workspaces": [
     "packages/*",
     "examples/*"
