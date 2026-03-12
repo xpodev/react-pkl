@@ -258,7 +258,3 @@ export default defineConfig({
 - [Getting Started Guide](../../docs/GETTING_STARTED.md)
 - [API Reference](../../docs/API.md)
 - [Examples](../../examples/plugins/)
-
-## License
-
-[Insert license]

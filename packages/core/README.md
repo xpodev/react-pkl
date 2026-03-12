@@ -105,7 +105,3 @@ const toolbarComponents = useSlotComponents('toolbar');
 - [API Reference](../../docs/API.md)
 - [Advanced Usage](../../docs/ADVANCED.md)
 - [Examples](../../examples/)
-
-## License
-
-[Insert license]
