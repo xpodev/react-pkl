@@ -1,4 +1,4 @@
-import { createLayoutContext, createSlot } from '@react-pkl/core/react';
+import { createLayoutContext, createSlot } from '@pkl.js/react/react';
 
 /**
  * Layout shape for the app.

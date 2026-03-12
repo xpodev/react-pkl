@@ -22,4 +22,4 @@ export {
 } from './services.js';
 
 // Re-export PluginEntrypoints component for rendering plugin entrypoints
-export { PluginEntrypoints } from '@react-pkl/core/react';
+export { PluginEntrypoints } from '@pkl.js/react/react';

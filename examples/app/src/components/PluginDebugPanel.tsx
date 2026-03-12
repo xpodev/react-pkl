@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { useAppPluginMeta } from 'example-sdk/react';
-import type { PluginHost } from '@react-pkl/core';
+import type { PluginHost } from '@pkl.js/react';
 import type { AppContext } from 'example-sdk';
-import { isStaticPlugin } from '@react-pkl/core';
+import { isStaticPlugin } from '@pkl.js/react';
 
 /**
  * PluginDebugPanel - Development tool for managing plugins

@@ -1,7 +1,7 @@
 {
   "name": "example-sdk",
   "version": "0.1.0",
-  "description": "Example SDK built on @react-pkl/core – demonstrates how an SDK author would wrap the library",
+  "description": "Example SDK built on @pkl.js/react – demonstrates how an SDK author would wrap the library",
   "type": "module",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
@@ -24,7 +24,7 @@
     "clean": "rimraf dist"
   },
   "dependencies": {
-    "@react-pkl/core": "*"
+    "@pkl.js/react": "*"
   },
   "peerDependencies": {
     "react": ">=18.0.0"

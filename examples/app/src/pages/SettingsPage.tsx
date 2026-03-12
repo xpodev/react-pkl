@@ -1,4 +1,4 @@
-import type { PluginHost } from '@react-pkl/core';
+import type { PluginHost } from '@pkl.js/react';
 import type { AppContext } from 'example-sdk';
 import { useAppLayout } from 'example-sdk';
 import { PageLayout } from '../components/PageLayout.js';

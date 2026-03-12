@@ -1,5 +1,5 @@
-import { createTypedHooks } from '@react-pkl/core/react';
-import type { PluginInfrastructure } from '@react-pkl/core';
+import { createTypedHooks } from '@pkl.js/react/react';
+import type { PluginInfrastructure } from '@pkl.js/react';
 
 /**
  * Typed hooks for plugin infrastructure - automatically generated via createTypedHooks.

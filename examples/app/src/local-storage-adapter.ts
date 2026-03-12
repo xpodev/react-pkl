@@ -1,4 +1,4 @@
-import type { PluginProvider, PluginDescriptor } from '@react-pkl/core';
+import type { PluginProvider, PluginDescriptor } from '@pkl.js/react';
 import {
   helloPlugin,
   userGreetingPlugin,

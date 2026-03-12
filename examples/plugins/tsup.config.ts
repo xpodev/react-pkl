@@ -13,6 +13,6 @@ export default defineConfig({
   dts: true,
   sourcemap: true,
   clean: true,
-  external: ['react', 'react-dom', '@react-pkl/core', '@react-pkl/example-sdk'],
+  external: ['react', 'react-dom', '@pkl.js/react', '@react-pkl/example-sdk'],
   treeshake: true,
 });

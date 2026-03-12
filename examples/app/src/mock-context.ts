@@ -1,5 +1,5 @@
 import type { AppContext, PluginRoute } from 'example-sdk';
-import type { PluginHost } from '@react-pkl/core';
+import type { PluginHost } from '@pkl.js/react';
 
 let _notifId = 0;
 

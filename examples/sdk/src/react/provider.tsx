@@ -1,4 +1,4 @@
-import { PluginProvider, type PluginProviderProps } from '@react-pkl/core/react';
+import { PluginProvider, type PluginProviderProps } from '@pkl.js/react/react';
 
 /**
  * AppPluginProvider

@@ -1,4 +1,4 @@
-import { createLayoutSlot } from '@react-pkl/core/react';
+import { createLayoutSlot } from '@pkl.js/react/react';
 import { useRouter } from './react/services.js';
 import { useAppLayout } from './slots.js';
 

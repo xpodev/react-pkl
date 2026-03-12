@@ -6,7 +6,7 @@ import {
   type PluginInfrastructure,
   type PluginLoader,
   type PluginModule,
-} from '@react-pkl/core';
+} from '@pkl.js/react';
 
 // ---------------------------------------------------------------------------
 // Typed plugin shape

@@ -27,8 +27,8 @@ export default defineConfig({
     //      goes away.
     // NOTE: more-specific subpath aliases must come before the package root.
     alias: [
-      { find: '@react-pkl/core/react',    replacement: pkgSrc('core', 'react/index.ts') },
-      { find: '@react-pkl/core',          replacement: pkgSrc('core') },
+      { find: '@pkl.js/react/react',    replacement: pkgSrc('core', 'react/index.ts') },
+      { find: '@pkl.js/react',          replacement: pkgSrc('core') },
       { find: 'example-sdk/react',        replacement: exampleSrc('sdk', 'react/index.ts') },
       { find: 'example-sdk',              replacement: exampleSrc('sdk') },
       { find: 'example-plugins',          replacement: exampleSrc('plugins') },

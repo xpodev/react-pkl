@@ -22,7 +22,7 @@ import { createLoggerService } from './services/logger.js';
 import { LocalStoragePluginProvider } from './local-storage-adapter.js';
 import { Shell } from './pages/Shell.js';
 import { SettingsPage } from './pages/SettingsPage.js';
-import type { PluginHost } from '@react-pkl/core';
+import type { PluginHost } from '@pkl.js/react';
 import type { UserInfo } from 'example-sdk';
 
 // ---------------------------------------------------------------------------
@@ -89,7 +89,7 @@ function AppWithRouter() {
   
   // Subscribe to plugin state changes and save to provider
   useEffect(() => {
-    const unsubscribe = registry.subscribe((event: import('@react-pkl/core').PluginEvent) => {
+    const unsubscribe = registry.subscribe((event: import('@pkl.js/react').PluginEvent) => {
       if (event.type === 'enabled' || event.type === 'disabled') {
         if (provider.savePluginState) {
           provider.savePluginState(event.pluginId, event.type === 'enabled');

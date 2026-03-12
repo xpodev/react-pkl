@@ -1,4 +1,4 @@
-import type { PluginHost } from '@react-pkl/core';
+import type { PluginHost } from '@pkl.js/react';
 import type { AppContext } from 'example-sdk';
 import { AppHeader, AppSidebar } from 'example-sdk';
 
