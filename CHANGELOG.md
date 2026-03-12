@@ -30,14 +30,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Comprehensive documentation
 - Example application, SDK, and plugins
 
-### Core Package (@react-pkl/core@0.1.0)
+### Core Package (@pkl.js/react@0.1.0)
 - Plugin lifecycle management (add, enable, disable, remove)
 - Automatic resource cleanup when plugins are disabled
 - Event system for plugin state changes
 - Type-safe context passing to plugins
 - Support for both synchronous and asynchronous plugin loading
 
-### SDK Package (@react-pkl/sdk@0.1.0)
+### SDK Package (@pkl.js/react-sdk@0.1.0)
 - `buildPlugin()` function for bundling plugins
 - Support for ESM and CJS output formats
 - Automatic React/JSX transformation

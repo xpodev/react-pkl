@@ -51,8 +51,8 @@ bundle exec jekyll serve --livereload
 ```
 react-pkl/
 ├── packages/
-│   ├── core/          # @react-pkl/core - Core plugin system
-│   └── sdk/           # @react-pkl/sdk - Build tools for plugins
+│   ├── core/          # @pkl.js/react - Core plugin system
+│   └── sdk/           # @pkl.js/react-sdk - Build tools for plugins
 └── examples/
     ├── sdk/           # example-sdk - Custom SDK built on core
     ├── plugins/       # example-plugins - Sample plugins
